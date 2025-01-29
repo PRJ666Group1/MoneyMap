@@ -1,8 +1,8 @@
 {
   "name": "money-map",
-  "productName": "money-map",
-  "version": "1.0.0",
-  "description": "My Electron application description",
+  "productName": "MoneyMap",
+  "version": "0.0.1",
+  "description": "MoneyMap, for tracking your finances.",
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
@@ -27,14 +27,33 @@
     "babel-loader": "^9.2.1",
     "css-loader": "^6.0.0",
     "electron": "34.0.0",
+    "html-webpack-plugin": "^5.6.3",
     "node-loader": "^2.0.0",
     "style-loader": "^3.0.0"
   },
   "keywords": [],
-  "author": {
-    "name": "Arad Fadaei",
-    "email": "arad@fadaei.dev"
-  },
+  "authors": [
+    {
+      "name": "Arad Fadaei",
+      "email": "arad@fadaei.dev"
+    },
+    {
+      "name": "Vladislav Yatsenko",
+      "email": "vyatsenko@myseneca.ca"
+    },
+    {
+      "name": "Roma Amiri",
+      "email": "ramiri4@myseneca.ca"
+    },
+    {
+      "name": "Athul Anilkumar",
+      "email": "aanilkumar5@myseneca.ca"
+    },
+    {
+      "name": "Arya Rajeshbhai Kavar",
+      "email": "akavar@myseneca.ca"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
     "electron-squirrel-startup": "^1.0.1",

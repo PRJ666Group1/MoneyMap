@@ -26,4 +26,4 @@
  * ```
  */
 
-import './app.jsx';
+import './frontend/app.jsx';
