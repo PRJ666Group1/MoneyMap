@@ -42,18 +42,21 @@ class GoalService {
 
   // Method to delete a financial goal
   async deleteGoal(id) {
-    try {
-      const deletedCount = await FinancialGoal.destroy({ where: { id } });
-      if (deletedCount > 0) {
-        return { success: true };  // Return success if the goal was deleted
-      } else {
-        return { error: 'Goal not found or not deleted.' };  // Error if no rows were deleted
-      }
-    } catch (error) {
-      console.error('Error deleting goal:', error);
-      return { error: 'Failed to delete goal.' };  // Structured error response
+  try {
+    console.log(`Attempting to delete goal with ID: ${id}`);  // Debugging
+    const deletedCount = await FinancialGoal.destroy({ where: { id: parseInt(id) } });
+    if (deletedCount > 0) {
+      return { success: true };
+    } else {
+      console.error(`No goal found with ID: ${id}`);  // Debugging
+      return { error: 'Goal not found or not deleted.' };
     }
+  } catch (error) {
+    console.error('Error deleting goal:', error);
+    return { error: 'Failed to delete goal.' };
   }
+}
+
 }
 
 module.exports = new GoalService();  // Export an instance for direct usage

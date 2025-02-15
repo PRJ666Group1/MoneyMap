@@ -66,6 +66,7 @@ const LeftSidebar = () => {
           <li><Link to="/log-transactions">Log transactions</Link></li>
           <li><Link to="/track-budget">Track budget, Income & Expenses</Link></li>
           <li><Link to="/financial-goal">Set financial goals</Link></li>
+          <li><Link to="/financial-goals-dashboard">Financial goals dashboard</Link></li>
         </ul>
       </Nav>
     </SidebarContainer>

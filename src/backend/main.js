@@ -39,7 +39,9 @@ app.whenReady().then(() => {
   });
 
   ipcMain.handle('get-goals', async () => {
-    return await GoalService.getGoals();
+    const goals = await GoalService.getGoals();
+    console.log("Goals fetched from DB:", goals); // Debugging
+    return goals;
   });
 
   ipcMain.handle('update-goal', async (event, id, updatedData) => {
