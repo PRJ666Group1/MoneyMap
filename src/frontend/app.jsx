@@ -1,10 +1,12 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import styled from "styled-components"; // Import styled-components
+
+import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSidebar component
 import HomePage from "./pages/HomePage.jsx";
 import FinancialGoal from "./pages/FinancialGoal.jsx";
-import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSidebar component
-import styled from "styled-components"; // Import styled-components
+import FinancialGoalsDashboard from "./pages/FinancialGoalsDashboard.jsx";
 
 // Styled-components for layout
 const AppContainer = styled.div`
@@ -31,6 +33,7 @@ function App() {
           <Routes>
             <Route path="/main_window" element={<HomePage />} />
             <Route path="/financial-goal" element={<FinancialGoal />} />
+            <Route path="/financial-goals-dashboard" element={<FinancialGoalsDashboard />} />
           </Routes>
         </MainContent>
       </AppContainer>

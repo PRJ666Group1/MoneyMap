@@ -1,6 +1,10 @@
-import { app, BrowserWindow } from 'electron';
-import path from 'node:path';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import started from 'electron-squirrel-startup';
+import path from 'node:path';
+
+// Import services and initialize the database
+const { initializeDatabase } = require('./database');
+const GoalService = require('./services/GoalService'); // Import the GoalService
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -17,7 +21,7 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
+  // Load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
@@ -26,11 +30,31 @@ const createWindow = () => {
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
+  initializeDatabase();
+
+  // IPC handlers for financial goal CRUD operations using GoalService
+  ipcMain.handle('create-goal', async (event, goalData) => {
+    return await GoalService.createGoal(goalData);
+  });
+
+  ipcMain.handle('get-goals', async () => {
+    const goals = await GoalService.getGoals();
+    console.log("Goals fetched from DB:", goals); // Debugging
+    return goals;
+  });
+
+  ipcMain.handle('update-goal', async (event, id, updatedData) => {
+    return await GoalService.updateGoal(id, updatedData);
+  });
+
+  ipcMain.handle('delete-goal', async (event, id) => {
+    return await GoalService.deleteGoal(id);
+  });
+
   createWindow();
 
-  // On OS X it's common to re-create a window in the app when the
+ // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
