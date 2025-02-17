@@ -1,12 +1,16 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route } from "react-router-dom";
 import styled from "styled-components"; // Import styled-components
+import { MantineProvider } from "@mantine/core"; // Import MantineProvider
+import "@mantine/core/styles.css";
+import "@mantine/dates/styles.css";
 
 import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSidebar component
 import HomePage from "./pages/HomePage.jsx";
 import FinancialGoal from "./pages/FinancialGoal.jsx";
 import FinancialGoalsDashboard from "./pages/FinancialGoalsDashboard.jsx";
+import LogTransactions from "./pages/LogTransactions.jsx";
 
 // Styled-components for layout
 const AppContainer = styled.div`
@@ -23,21 +27,27 @@ const MainContent = styled.div`
 
 function App() {
   return (
-    <Router>
-      <AppContainer>
-        {/* Sidebar */}
-        <LeftSidebar />
+    <MantineProvider withGlobalStyles withNormalizeCSS>
+      <HashRouter>
+        <AppContainer>
+          {/* Sidebar */}
+          <LeftSidebar />
 
-        {/* Main Content */}
-        <MainContent>
-          <Routes>
-            <Route path="/main_window" element={<HomePage />} />
-            <Route path="/financial-goal" element={<FinancialGoal />} />
-            <Route path="/financial-goals-dashboard" element={<FinancialGoalsDashboard />} />
-          </Routes>
-        </MainContent>
-      </AppContainer>
-    </Router>
+          {/* Main Content */}
+          <MainContent>
+            <Routes>
+              <Route path="/main_window" element={<HomePage />} />
+              <Route path="/log-transactions" element={<LogTransactions />} />
+              <Route path="/financial-goal" element={<FinancialGoal />} />
+              <Route
+                path="/financial-goals-dashboard"
+                element={<FinancialGoalsDashboard />}
+              />
+            </Routes>
+          </MainContent>
+        </AppContainer>
+      </HashRouter>
+    </MantineProvider>
   );
 }
 
