@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { Container, Card } from "@mantine/core";
 
 const FinancialGoalsDashboard = () => {
   const [goals, setGoals] = useState([]);
@@ -12,7 +13,7 @@ const FinancialGoalsDashboard = () => {
       try {
         const response = await window.electron.ipcRenderer.invoke('get-goals');
         console.log("Response from IPC:", response); // Debugging
-  
+
         // Ensure goals is an array
         setGoals(Array.isArray(response.goals) ? response.goals : []);
       } catch (err) {
@@ -22,13 +23,13 @@ const FinancialGoalsDashboard = () => {
         setLoading(false);
       }
     };
-  
+
     fetchGoals();
   }, []);
 
   // Delete a goal
   // Delete a goal and refresh the goal list
-const handleDelete = async (id) => {
+  const handleDelete = async (id) => {
     try {
       const response = await window.electron.ipcRenderer.invoke("delete-goal", id);
       if (response.success) {
@@ -42,35 +43,36 @@ const handleDelete = async (id) => {
       console.error("Error deleting goal:", err);
     }
   };
-  
+
 
   if (loading) return <Loading>Loading...</Loading>;
   if (error) return <Error>{error}</Error>;
 
   return (
-    <DashboardContainer>
-      <Title>Financial Goals</Title>
-      {goals.length === 0 ? (
-        <NoGoals>No financial goals found.</NoGoals>
-      ) : (
-        <GoalsTable>
-          <thead>
-            <tr>
-              <TableHeader>Name</TableHeader>
-              <TableHeader>Target Amount</TableHeader>
-              <TableHeader>Category</TableHeader>
-              <TableHeader>Recurring</TableHeader>
-              <TableHeader>Income Amount</TableHeader>
-              <TableHeader>Frequency</TableHeader>
-              <TableHeader>Target Date</TableHeader>
-              <TableHeader>Actions</TableHeader>
-            </tr>
-          </thead>
-          <tbody>
-            {goals.map(goal => {
+    <Container size="xl">
+      <Card bg="green.4">
+        <Title>Financial Goals</Title>
+        {goals.length === 0 ? (
+          <NoGoals>No financial goals found.</NoGoals>
+        ) : (
+          <GoalsTable>
+            <thead>
+              <tr>
+                <TableHeader>Name</TableHeader>
+                <TableHeader>Target Amount</TableHeader>
+                <TableHeader>Category</TableHeader>
+                <TableHeader>Recurring</TableHeader>
+                <TableHeader>Income Amount</TableHeader>
+                <TableHeader>Frequency</TableHeader>
+                <TableHeader>Target Date</TableHeader>
+                <TableHeader>Actions</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {goals.map(goal => {
                 console.log("Rendering goal:", goal.dataValues); // Debugging
                 return (
-                <tr key={goal.dataValues.id}>
+                  <tr key={goal.dataValues.id}>
                     <TableData>{goal.dataValues.name}</TableData>
                     <TableData>${goal.dataValues.targetAmount}</TableData>
                     <TableData>{goal.dataValues.category}</TableData>
@@ -79,15 +81,16 @@ const handleDelete = async (id) => {
                     <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
                     <TableData>{new Date(goal.dataValues.targetDate).toLocaleDateString()}</TableData>
                     <TableData>
-                    <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>Delete</DeleteButton>
+                      <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>Delete</DeleteButton>
                     </TableData>
-                </tr>
+                  </tr>
                 );
-            })}
-          </tbody>
-        </GoalsTable>
-      )}
-    </DashboardContainer>
+              })}
+            </tbody>
+          </GoalsTable>
+        )}
+      </Card>
+    </Container>
   );
 };
 
@@ -95,9 +98,9 @@ export default FinancialGoalsDashboard;
 
 // Styled Components
 
-const DashboardContainer = styled.div`
-  padding: 20px;
-`;
+// const DashboardContainer = styled.div`
+//   padding: 20px;
+// `;
 
 const Title = styled.h2`
   font-size: 2em;
@@ -116,7 +119,7 @@ const Error = styled.div`
 
 const NoGoals = styled.p`
   font-size: 1.2em;
-  color: #333;
+  color: #555;
 `;
 
 const GoalsTable = styled.table`
@@ -128,13 +131,14 @@ const TableHeader = styled.th`
   padding: 10px;
   text-align: left;
   border: 1px solid #ccc;
-  background-color: #f4f4f4;
+  background-color: var(--mantine-color-green-9);
 `;
 
 const TableData = styled.td`
   padding: 10px;
   text-align: left;
   border: 1px solid #ccc;
+  background-color: var(--mantine-color-green-6);
 `;
 
 const DeleteButton = styled.button`

@@ -16,7 +16,7 @@ import LogTransactions from "./pages/LogTransactions.jsx";
 const AppContainer = styled.div`
   display: flex;
   min-height: 100vh;
-  background-color: #397d2c;
+  background-color: #10151A;
 `;
 
 const MainContent = styled.div`
