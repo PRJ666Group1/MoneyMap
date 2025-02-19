@@ -17,7 +17,6 @@ import {
   Input,
   InputBase,
   NumberInput,
-  Text
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
 
@@ -118,7 +117,7 @@ const LogTransactions = () => {
 
   return (
     <Container size="xl">
-      <Card bg="green.4">
+      <Card>
         <Stack>
           <Group justify="space-between">
             <Group>
@@ -135,21 +134,21 @@ const LogTransactions = () => {
           <Table>
             <Table.Thead>
               <Table.Tr>
-                <Table.Th><Text fw="bold" span>ID.</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Company Name</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Date</Text></Table.Th>
-                <Table.Th> <Text fw="bold" span>Status</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Amount</Text></Table.Th>
+                <Table.Th>ID.</Table.Th>
+                <Table.Th>Company Name</Table.Th>
+                <Table.Th>Date</Table.Th>
+                <Table.Th>Status</Table.Th>
+                <Table.Th>Amount</Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
               {transactions.map((transaction, index) => (
                 <Table.Tr key={index}>
-                  <Table.Td><Text span>{index + 1}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.companyName}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
-                  <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+                  <Table.Td>{index + 1}</Table.Td>
+                  <Table.Td>{transaction.dataValues.companyName}</Table.Td>
+                  <Table.Td>{transaction.dataValues.date}</Table.Td>
+                  <Table.Td>{transaction.dataValues.status}</Table.Td>
+                  <Table.Td>${transaction.dataValues.amount}</Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -163,52 +162,49 @@ const LogTransactions = () => {
           closeModal();
           resetModalValues();
         }}
-        title="Add New Transaction Manually"
-        overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 3,
-        }}
+        title="Add New Transaction"
       >
-        <Stack align="center">
-          <Autocomplete
-            w="100%"
-            placeholder="Company Name"
-            value={companyName}
-            onChange={setCompanyName}
-          />
-          <DatePicker placeholder="Date" value={date} onChange={setDate} />
-          <Combobox
-            store={statusCombobox}
-            onOptionSubmit={(val) => {
-              setStatusValue(val);
-              statusCombobox.closeDropdown();
-            }}
-            w="100%"
-          >
-            <Combobox.Target>
-              <InputBase
-                component="button"
-                type="button"
-                pointer
-                rightSection={<Combobox.Chevron />}
-                rightSectionPointerEvents="none"
-                onClick={() => statusCombobox.toggleDropdown()}
-              >
-                {statusValue || <Input.Placeholder>Status</Input.Placeholder>}
-              </InputBase>
-            </Combobox.Target>
+        <Stack>
+          <Group justify="center">
+            <Autocomplete
+              placeholder="Company Name"
+              value={companyName}
+              onChange={setCompanyName}
+            />
+            <DatePicker placeholder="Date" value={date} onChange={setDate} />
+          </Group>
+          <Group justify="center">
+            <Combobox
+              store={statusCombobox}
+              onOptionSubmit={(val) => {
+                setStatusValue(val);
+                statusCombobox.closeDropdown();
+              }}
+            >
+              <Combobox.Target>
+                <InputBase
+                  component="button"
+                  type="button"
+                  pointer
+                  rightSection={<Combobox.Chevron />}
+                  rightSectionPointerEvents="none"
+                  onClick={() => statusCombobox.toggleDropdown()}
+                >
+                  {statusValue || <Input.Placeholder>Status</Input.Placeholder>}
+                </InputBase>
+              </Combobox.Target>
 
-            <Combobox.Dropdown>
-              <Combobox.Options>{statusOptions}</Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
-          <NumberInput
-            w="100%"
-            placeholder="Amount"
-            prefix="$"
-            value={amount}
-            onChange={setAmount}
-          />
+              <Combobox.Dropdown>
+                <Combobox.Options>{statusOptions}</Combobox.Options>
+              </Combobox.Dropdown>
+            </Combobox>
+            <NumberInput
+              placeholder="Amount"
+              prefix="$"
+              value={amount}
+              onChange={setAmount}
+            />
+          </Group>
           <Button
             color="green"
             onClick={() => {

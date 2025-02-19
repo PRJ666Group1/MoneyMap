@@ -90,5 +90,3 @@ typings/
 
 # Electron-Forge
 out/
-
-src/backend/moneyMap_db/database.sqlite
