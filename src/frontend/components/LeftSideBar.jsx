@@ -62,7 +62,7 @@ const LeftSidebar = () => {
       <Logo>MoneyMap</Logo>
       <Nav>
         <ul>
-          <li><Link to="/main_window">Home</Link></li>
+          <li><Link to="/">Home</Link></li>
           <li><Link to="/log-transactions">Log transactions</Link></li>
           <li><Link to="/track-budget">Track budget, Income & Expenses</Link></li>
           <li><Link to="/financial-goal">Set financial goals</Link></li>

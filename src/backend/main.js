@@ -1,6 +1,5 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
-import path from "node:path";
 
 // Import services and initialize the database
 const { initializeDatabase } = require("./database");
@@ -22,11 +21,15 @@ const createWindow = () => {
     },
   });
 
+  // start application at max window size and remove menu bar
+  mainWindow.maximize();
+  mainWindow.removeMenu();
+
   // Load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
