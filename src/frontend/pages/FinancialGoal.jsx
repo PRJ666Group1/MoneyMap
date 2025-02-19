@@ -1,21 +1,22 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import { Container, Card, Button, Group } from "@mantine/core";
 
-const MainContainer = styled.div`
-  background-color: white;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  width: 80%;
-  margin: 20px auto;
-`;
+// const MainContainer = styled.div`
+//   background-color: white;
+//   padding: 20px;
+//   border-radius: 15px;
+//   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+//   width: 80%;
+//   margin: 20px auto;
+// `;
 
-const Container = styled.div`
-  background-color: #397d2c;
-  border-radius: 15px;
-  padding: 30px;
-  color: white;
-`;
+// const Container = styled.div`
+//   background-color: #397d2c;
+//   border-radius: 15px;
+//   padding: 30px;
+//   color: white;
+// `;
 
 const Title = styled.h3`
   text-align: center;
@@ -75,21 +76,21 @@ const ButtonContainer = styled.div`
   margin-top: 20px;
 `;
 
-const Button = styled.button`
-  background-color: #397d2c;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 10px;
-  font-size: 16px;
-  border: 1px dotted white;
+// const Button = styled.button`
+//   background-color: #397d2c;
+//   color: white;
+//   padding: 10px 20px;
+//   border: none;
+//   border-radius: 8px;
+//   cursor: pointer;
+//   margin: 10px;
+//   font-size: 16px;
+//   border: 1px dotted white;
 
-  &:hover {
-    background-color: #2f6b24;
-  }
-`;
+//   &:hover {
+//     background-color: #2f6b24;
+//   }
+// `;
 
 const DateLabel = styled.label`
   font-size: 16px;
@@ -163,8 +164,8 @@ function FinancialGoal() {
   };
 
   return (
-    <MainContainer>
-      <Container>
+    <Container size="xl">
+      <Card bg="green.4">
         <Title>Create new financial goal</Title>
 
         <FormContainer>
@@ -240,8 +241,8 @@ function FinancialGoal() {
         <ButtonContainer>
           <Button onClick={saveGoal}>Save New Goal</Button>
         </ButtonContainer>
-      </Container>
-    </MainContainer>
+      </Card>
+    </Container>
   );
 }
 

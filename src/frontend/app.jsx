@@ -16,12 +16,11 @@ import LogTransactions from "./pages/LogTransactions.jsx";
 const AppContainer = styled.div`
   display: flex;
   min-height: 100vh;
-  background-color: #397d2c;
+  background-color: #10151A;
 `;
 
 const MainContent = styled.div`
   flex: 1;
-  margin-left: 300px; /* Adjust based on the width of the sidebar */
   padding: 20px;
 `;
 
