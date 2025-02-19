@@ -35,7 +35,7 @@ function App() {
           {/* Main Content */}
           <MainContent>
             <Routes>
-              <Route path="/main_window" element={<HomePage />} />
+              <Route path="/" element={<HomePage />} />
               <Route path="/log-transactions" element={<LogTransactions />} />
               <Route path="/financial-goal" element={<FinancialGoal />} />
               <Route

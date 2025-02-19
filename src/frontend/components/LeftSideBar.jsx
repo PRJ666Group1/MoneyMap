@@ -26,7 +26,7 @@ function NavbarLink({ to, icon: Icon, label, active, onClick }) {
 }
 
 const linkData = [
-  { icon: FaHome, label: 'Home', to: '/main_window' },
+  { icon: FaHome, label: 'Home', to: '/' },
   { icon: FaFileAlt, label: 'Log Transactions', to: 'log-transactions' }, // Represents document/logging
   { icon: FaChartLine, label: 'Track Budget, Income & Expenses', to: '/track-budget' }, // Represents financial tracking
   { icon: FaBullseye, label: 'Set Financial Goal', to: '/financial-goal' }, // Represents goal setting
