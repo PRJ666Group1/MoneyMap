@@ -26,7 +26,7 @@ const createWindow = () => {
   mainWindow.removeMenu();
 
   // Load the index.html of the app.
-  mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  mainWindow.loadURL(`${MAIN_WINDOW_WEBPACK_ENTRY}#/main_window`);
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();

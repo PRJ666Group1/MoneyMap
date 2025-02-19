@@ -21,7 +21,6 @@ const AppContainer = styled.div`
 
 const MainContent = styled.div`
   flex: 1;
-  margin-left: 300px; /* Adjust based on the width of the sidebar */
   padding: 20px;
 `;
 
@@ -36,7 +35,7 @@ function App() {
           {/* Main Content */}
           <MainContent>
             <Routes>
-              <Route path="/" element={<HomePage />} />
+              <Route path="/main_window" element={<HomePage />} />
               <Route path="/log-transactions" element={<LogTransactions />} />
               <Route path="/financial-goal" element={<FinancialGoal />} />
               <Route

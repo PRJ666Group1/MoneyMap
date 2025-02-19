@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { Center, Stack, Tooltip, UnstyledButton } from '@mantine/core';
 import classes from './LeftSideBar.module.css';
 
-import { FaDollarSign } from '@react-icons/all-files/fa/FaDollarSign';
-import { FaHome } from '@react-icons/all-files/fa/FaHome';
-import { FaFileAlt } from '@react-icons/all-files/fa/FaFileAlt';
-import { FaChartLine } from '@react-icons/all-files/fa/FaChartLine';
-import { FaBullseye } from '@react-icons/all-files/fa/FaBullseye';
-import { FaTachometerAlt } from '@react-icons/all-files/fa/FaTachometerAlt';
-import { FaCog } from '@react-icons/all-files/fa/FaCog';
+import { FaDollarSign } from 'react-icons/fa';
+import { FaHome } from 'react-icons/fa';
+import { FaFileAlt } from 'react-icons/fa';
+import { FaChartLine } from 'react-icons/fa';
+import { FaBullseye } from 'react-icons/fa';;
+import { FaTachometerAlt } from 'react-icons/fa';
+import { FaCog } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
 function NavbarLink({ to, icon: Icon, label, active, onClick }) {
@@ -36,7 +36,7 @@ const linkData = [
 ];
 
 export default function LeftSideBar() {
-  const [active, setActive] = useState(2);
+  const [active, setActive] = useState(0);
 
   const links = linkData.map((link, index) => (
     <NavbarLink
