@@ -11,6 +11,7 @@ import HomePage from "./pages/HomePage.jsx";
 import FinancialGoal from "./pages/FinancialGoal.jsx";
 import FinancialGoalsDashboard from "./pages/FinancialGoalsDashboard.jsx";
 import LogTransactions from "./pages/LogTransactions.jsx";
+import TrackBudget from "./pages/TrackBudget.jsx"; // Import TrackBudget
 
 // Styled-components for layout
 const AppContainer = styled.div`
@@ -40,8 +41,10 @@ function App() {
               <Route path="/financial-goal" element={<FinancialGoal />} />
               <Route
                 path="/financial-goals-dashboard"
-                element={<FinancialGoalsDashboard />}
+                element={<FinancialGoalsDashboard />
+                }
               />
+              <Route path="/track-budget" element={<TrackBudget />} /> {/* Add the new route here */}
             </Routes>
           </MainContent>
         </AppContainer>
