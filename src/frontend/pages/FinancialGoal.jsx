@@ -111,6 +111,16 @@ const MessageContainer = styled.div`
     props.show ? "visible" : "hidden"}; /* ✅ Hide when empty */
 `;
 
+const ErrorMsg = styled.p`
+  color: red;
+  font-size: 14px;
+  //margin: 3px 0;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+`;
+
+
 function FinancialGoal() {
   const { ipcRenderer } = window.electron;
 
@@ -123,9 +133,33 @@ function FinancialGoal() {
   const [frequency, setFrequency] = useState("");
   const [targetDate, setTargetDate] = useState("");
   const [message, setMessage] = useState(null);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    let newErrors = {};
+    if (!goalName) newErrors.goalName = "Goal name is required.";
+    if (!targetAmount || parseFloat(targetAmount) <= 0) newErrors.targetAmount = "Target amount must be greater than 0.";
+    if (!category) newErrors.category = "Category is required.";
+    if (recurring) {
+      if (!incomeAmount || parseFloat(incomeAmount) <= 0) newErrors.incomeAmount = "Income amount is required and must be positive.";
+      if (!frequency) newErrors.frequency = "Frequency is required.";
+    }
+    if (!targetDate) {
+      newErrors.targetDate = "Target date is required.";
+    } else if (new Date(targetDate) < new Date()) {
+      newErrors.targetDate = "Target date cannot be in the past.";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // **Save Goal Function**
   const saveGoal = async () => {
+    if (!validate()){
+      setMessage({ type: "error", text: `Please fix the input errors to save a goal` });
+      return;
+    }
+
     const goalData = {
       name: goalName,
       targetAmount: parseFloat(targetAmount) || 0,
@@ -171,23 +205,26 @@ function FinancialGoal() {
         <FormContainer>
           {/* First Column */}
           <FormSection>
+            {errors.goalName && <ErrorMsg>{errors.goalName}</ErrorMsg>}
             <Input
               type="text"
               placeholder="Goal Name"
               value={goalName}
               onChange={(e) => setGoalName(e.target.value)}
             />
+            {errors.targetAmount && <ErrorMsg>{errors.targetAmount}</ErrorMsg>}
             <Input
               type="number"
               placeholder="Target Amount"
               value={targetAmount}
               onChange={(e) => setTargetAmount(e.target.value)}
             />
+            {errors.category && <ErrorMsg>{errors.category}</ErrorMsg>}
             <Select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="">Select Category</option>
+              <option value="" disabled selected>Select Category</option>
               <option value="savings">Savings</option>
               <option value="investment">Investment</option>
               <option value="emergency">Emergency Fund</option>
@@ -204,6 +241,7 @@ function FinancialGoal() {
               />
               <Label>Enable Automatic Recurring Contributions</Label>
             </CheckboxContainer>
+            {recurring && errors.incomeAmount && <ErrorMsg>{errors.incomeAmount}</ErrorMsg>}
             <Input
               type="number"
               placeholder="Amount of Income"
@@ -211,12 +249,13 @@ function FinancialGoal() {
               onChange={(e) => setIncomeAmount(e.target.value)}
               disabled={!recurring}
             />
+            {recurring && errors.frequency && <ErrorMsg>{errors.frequency}</ErrorMsg>}
             <Select
               value={frequency}
               onChange={(e) => setFrequency(e.target.value)}
               disabled={!recurring}
             >
-              <option value="">Select Frequency</option>
+              <option value="" disabled selected>Select Frequency</option>
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="quarterly">Quarterly</option>
@@ -225,6 +264,7 @@ function FinancialGoal() {
 
           {/* Third Column */}
           <FormSection>
+            {errors.targetDate && <ErrorMsg>{errors.targetDate}</ErrorMsg>}
             <DateLabel htmlFor="target-date">Target Date</DateLabel>
             <Input
               id="target-date"
