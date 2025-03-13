@@ -1,4 +1,4 @@
-const Transaction = require('../models/Transaction');
+const Transaction = require('../models/TransactionModel');
 const { sequelize } = require('../database'); 
 
 class TransactionService {
