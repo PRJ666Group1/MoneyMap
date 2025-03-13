@@ -1,5 +1,5 @@
 // src/backend/services/GoalService.js
-const FinancialGoal = require('../models/FinancialGoal');
+const FinancialGoal = require('../models/FinancialGoalModel');
 const { sequelize } = require('../database'); 
 
 class GoalService {
