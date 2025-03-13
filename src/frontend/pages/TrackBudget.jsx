@@ -86,7 +86,7 @@ const LegendItem = styled.div`
 
 const Alert = styled.div`
   text-align: center;
-  margin-top: 20px;
+  margin-bottom: 30px;
   color: red;
   font-size: 18px;
   font-weight: bold;
@@ -113,7 +113,7 @@ const ExpenseTracker = () => {
 
   const handleAddExpense = () => {
     if (!income || !expense || !category) {
-      alert("Please fill all fields");
+      setAlertMessage("Please fill all fields");
       return;
     }
 
