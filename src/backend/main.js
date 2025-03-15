@@ -1,5 +1,9 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, clipboard  } from "electron";
 import started from "electron-squirrel-startup";
+
+const fs = require("fs");
+const path = require("path");
+
 
 // Import services and initialize the database
 const { initializeDatabase } = require("./database");
@@ -32,10 +36,39 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+
+// Function to export all data to JSON
+const exportDataToJSON = async () => {
+  try {
+    const goals = await GoalService.getGoals();
+    const transactions = await TransactionService.getTransactions();
+
+    const jsonData = {
+      financialGoals: goals,
+      transactions: transactions,
+    };
+
+    const jsonString = JSON.stringify(jsonData, null, 4);
+
+    // Copy JSON string to clipboard
+    clipboard.writeText(jsonString);
+    
+    console.log("Data successfully copied to clipboard!");
+  } catch (error) {
+    console.error("Error exporting data to JSON:", error);
+  }
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {
   initializeDatabase();
+
+  // Convert DB to json and save to clipboard
+  ipcMain.handle("export-json", async (event, goalData) => {
+    return await exportDataToJSON(); // Export data after DB initialization
+  });
+  
 
   // IPC handlers for financial goal CRUD operations using GoalService
   ipcMain.handle("create-goal", async (event, goalData) => {
