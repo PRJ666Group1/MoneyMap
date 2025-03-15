@@ -134,12 +134,17 @@ function FinancialGoal() {
   const [targetDate, setTargetDate] = useState("");
   const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
+  const [customCategory, setCustomCategory] = useState("");
 
   const validate = () => {
     let newErrors = {};
     if (!goalName) newErrors.goalName = "Goal name is required.";
     if (!targetAmount || parseFloat(targetAmount) <= 0) newErrors.targetAmount = "Target amount must be greater than 0.";
-    if (!category) newErrors.category = "Category is required.";
+    if (!category) {
+      newErrors.category = "Category is required.";
+    } else if (category === "custom" && !customCategory){
+      newErrors.customCategory = "Custom category is required.";
+    }
     if (recurring) {
       if (!incomeAmount || parseFloat(incomeAmount) <= 0) newErrors.incomeAmount = "Income amount is required and must be positive.";
       if (!frequency) newErrors.frequency = "Frequency is required.";
@@ -160,10 +165,12 @@ function FinancialGoal() {
       return;
     }
 
+    const goalCategory = customCategory ? customCategory : category;
+
     const goalData = {
       name: goalName,
       targetAmount: parseFloat(targetAmount) || 0,
-      category,
+      category: goalCategory, 
       recurring,
       incomeAmount: recurring ? parseFloat(incomeAmount) || 0 : null,
       frequency: recurring ? frequency : null,
@@ -228,7 +235,17 @@ function FinancialGoal() {
               <option value="savings">Savings</option>
               <option value="investment">Investment</option>
               <option value="emergency">Emergency Fund</option>
+              <option value="custom">Custom</option> {/* Add Custom Option */}
             </Select>
+            {errors.customCategory && <ErrorMsg>{errors.customCategory}</ErrorMsg>}
+            {category === "custom" && (  
+              <Input
+                type="text"
+                placeholder="Enter Custom Category"
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+              />
+            )}
           </FormSection>
 
           {/* Second Column */}
