@@ -2,15 +2,25 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
 
+// Utility function to generate random colors
+const generateRandomColor = () => {
+  const letters = '0123456789ABCDEF';
+  let color = '#';
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+};
+
 // Styled components for layout
 const MainContainer = styled.div`
   padding: 20px;
-  background-color: black;  /* Change background color to black */
+  background-color: black;
   border-radius: 15px;
 `;
 
 const BudgetBox = styled.div`
-  background-color: black;  /* Background color is now black */
+  background-color: black;
   padding: 20px;
   border-radius: 15px;
   display: flex;
@@ -19,7 +29,7 @@ const BudgetBox = styled.div`
 `;
 
 const LeftBox = styled.div`
-  background-color: #69DB7C;  /* Change green color to #69DB7C */
+  background-color: #69DB7C;
   border-radius: 15px;
   padding: 30px;
   color: white;
@@ -27,7 +37,7 @@ const LeftBox = styled.div`
 `;
 
 const RightBox = styled.div`
-  background-color: #69DB7C;  /* Change green color to #69DB7C */
+  background-color: #69DB7C;
   border-radius: 15px;
   padding: 30px;
   color: white;
@@ -53,15 +63,19 @@ const Select = styled.select`
 const Button = styled.button`
   background-color: #397d2c;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   margin-top: 10px;
 
   &:hover {
     background-color: #2f6b24;
+  }
+
+  &:not(:first-child) {
+    margin-left: 10px;
   }
 `;
 
@@ -80,8 +94,9 @@ const LegendContainer = styled.div`
 
 const LegendItem = styled.div`
   display: flex;
-  justify-content: center;
-  margin: 5px;
+  justify-content: space-between;
+  margin: 5px 0;
+  align-items: center;
 `;
 
 const Alert = styled.div`
@@ -96,53 +111,72 @@ const ExpenseTracker = () => {
   const [income, setIncome] = useState("");
   const [expense, setExpense] = useState("");
   const [category, setCategory] = useState("");
+  const [customCategory, setCustomCategory] = useState("");
   const [expenseData, setExpenseData] = useState([]);
-  const [resetGraph, setResetGraph] = useState(false);
+  const [categories, setCategories] = useState([
+    { name: "Rent", color: "#FF6347" },
+    { name: "Food", color: "#1E90FF" },
+    { name: "Groceries", color: "#FFD700" },
+    { name: "Utilities", color: "#8A2BE2" },
+    { name: "Entertainment", color: "#FF4500" },
+  ]);
   const [alertMessage, setAlertMessage] = useState("");
   const [incomeToExpenseRatio, setIncomeToExpenseRatio] = useState(null);
 
-  // Categories and colors
-  const categories = [
-    { name: "Rent", color: "#FF6347" }, // Red for Rent
-    { name: "Food", color: "#1E90FF" }, // Blue for Food
-    { name: "Groceries", color: "#FFD700" }, // Yellow for Groceries
-    { name: "Utilities", color: "#8A2BE2" }, // Purple for Utilities
-    { name: "Entertainment", color: "#FF4500" }, // Orange for Entertainment
-    { name: "Others", color: "#FF1493" }, // Pink for Others
-  ];
-
+  // Handle adding expense
   const handleAddExpense = () => {
     if (!income || !expense || !category) {
       setAlertMessage("Please fill all fields");
       return;
     }
 
-    const newExpense = {
-      category,
-      expense: parseFloat(expense),
-    };
+    const updatedExpenseData = [...expenseData];
+    const existingExpense = updatedExpenseData.find((e) => e.category === category);
 
-    setExpenseData([...expenseData, newExpense]);
+    if (existingExpense) {
+      existingExpense.expense = parseFloat(expense); // Update existing expense
+    } else {
+      const newExpense = { category, expense: parseFloat(expense) };
+      updatedExpenseData.push(newExpense); // Add new expense
+    }
+
+    setExpenseData(updatedExpenseData);
     setExpense(""); // Clear the expense input after adding
     setAlertMessage(""); // Reset alert message
-
-    setResetGraph(true); // Trigger reset
   };
 
-  const resetPieChart = () => {
-    setResetGraph(false);
+  // Add custom category with a random color
+  const handleAddCategory = () => {
+    if (customCategory) {
+      const newCategory = { name: customCategory, color: generateRandomColor() };
+      setCategories([...categories, newCategory]);
+      setCustomCategory(""); // Reset custom category field
+    }
+  };
+
+  // Clear all data (except income)
+  const handleClearAll = () => {
+    setExpenseData([]); // Clear all expense data
+    setIncome(""); // Reset income field
+    setCategory(""); // Reset category
+    setExpense(""); // Reset expense input
+    setCustomCategory(""); // Reset custom category input
+    setAlertMessage(""); // Clear any alert messages
+  };
+
+  // Delete specific expense
+  const handleDeleteExpense = (categoryToDelete) => {
+    setExpenseData(expenseData.filter((expense) => expense.category !== categoryToDelete));
   };
 
   const totalExpense = expenseData.reduce((acc, curr) => acc + curr.expense, 0);
   const incomeLeft = income - totalExpense;
 
-  // Calculate the income-to-expense ratio using useEffect
   useEffect(() => {
     const ratio = (incomeLeft / income) * 100;
     setIncomeToExpenseRatio(ratio);
   }, [income, expenseData]);
 
-  // Simple alert logic
   useEffect(() => {
     if (incomeLeft < 0) {
       setAlertMessage("Warning: Your expenses exceed your income!");
@@ -151,16 +185,15 @@ const ExpenseTracker = () => {
     }
   }, [incomeLeft]);
 
-  // Data for the pie chart
   const data = [
-    { name: "Income", value: incomeLeft, color: "#32CD32" }, // Green for income
-    ...categories.map((category) => ({
-      name: category.name,
-      value: expenseData
-        .filter((e) => e.category === category.name)
-        .reduce((acc, curr) => acc + curr.expense, 0),
-      color: category.color,
-    })),
+    { name: "Income", value: incomeLeft, color: "#32CD32" },
+    ...categories
+      .map((category) => ({
+        name: category.name,
+        value: expenseData.filter((e) => e.category === category.name).reduce((acc, curr) => acc + curr.expense, 0),
+        color: category.color,
+      }))
+      .filter((category) => category.value > 0), // Filter out categories with $0 value
   ];
 
   return (
@@ -189,7 +222,15 @@ const ExpenseTracker = () => {
               </option>
             ))}
           </Select>
+          <Input
+            type="text"
+            placeholder="Custom Category"
+            value={customCategory}
+            onChange={(e) => setCustomCategory(e.target.value)}
+          />
+          <Button onClick={handleAddCategory}>Add Custom Category</Button>
           <Button onClick={handleAddExpense}>Add Expense</Button>
+          <Button onClick={handleClearAll}>Clear All</Button>
         </LeftBox>
 
         {/* Right Section - Budget Overview */}
@@ -197,15 +238,7 @@ const ExpenseTracker = () => {
           <h2>Budget Overview</h2>
           <PieWrapper>
             <PieChart width={300} height={300}>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                onAnimationStart={resetPieChart}
-              >
+              <Pie data={data} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value">
                 {data.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
@@ -224,10 +257,14 @@ const ExpenseTracker = () => {
                     }}
                   />
                   <span>{entry.name}: ${entry.value}</span>
+                  {entry.name !== "Income" && (
+                    <Button onClick={() => handleDeleteExpense(entry.name)} style={{ fontSize: "12px", padding: "5px 10px" }}>
+                      Delete
+                    </Button>
+                  )}
                 </LegendItem>
               ))}
             </LegendContainer>
-            {/* Display Income-to-Expense Ratio */}
             {incomeToExpenseRatio !== null && (
               <div style={{ textAlign: "center", marginTop: "10px" }}>
                 <strong>Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</strong>

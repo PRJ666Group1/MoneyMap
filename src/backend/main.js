@@ -9,6 +9,7 @@ const path = require("path");
 const { initializeDatabase } = require("./database");
 const GoalService = require("./services/GoalService"); // Import the GoalService
 const TransactionService = require("./services/TransactionService"); // Import the TransactionService
+const BudgetService = require("./services/BudgetService"); // Import the BudgetService
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -42,10 +43,12 @@ const exportDataToJSON = async () => {
   try {
     const goals = await GoalService.getGoals();
     const transactions = await TransactionService.getTransactions();
+    const budgets = await BudgetService.getBudgets(); // Get budgets data
 
     const jsonData = {
       financialGoals: goals,
       transactions: transactions,
+      budgets: budgets, // Include budgets data in exported JSON
     };
 
     const jsonString = JSON.stringify(jsonData, null, 4);
@@ -107,6 +110,24 @@ app.whenReady().then(() => {
   ipcMain.handle("delete-transaction", async (event, id) => {
     return await TransactionService.deleteTransaction(id);
   });
+
+  ipcMain.handle("create-budget", async (event, budgetData) => {
+    return await BudgetService.createBudget(budgetData);
+  });
+  
+  ipcMain.handle("get-budgets", async () => {
+    const budgets = await BudgetService.getBudgets();
+    return budgets;
+  });
+  
+  ipcMain.handle("update-budget", async (event, id, updatedData) => {
+    return await BudgetService.updateBudget(id, updatedData);
+  });
+  
+  ipcMain.handle("delete-budget", async (event, id) => {
+    return await BudgetService.deleteBudget(id);
+  });
+  
 
   createWindow();
 
