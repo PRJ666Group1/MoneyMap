@@ -86,7 +86,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle("update-goal", async (event, id, updatedData) => {
     return await GoalService.updateGoal(id, updatedData);
-  });
+  }); 
 
   ipcMain.handle("delete-goal", async (event, id) => {
     return await GoalService.deleteGoal(id);
@@ -111,12 +111,14 @@ app.whenReady().then(() => {
     return await TransactionService.deleteTransaction(id);
   });
 
-  ipcMain.handle("create-budget", async (event, budgetData) => {
+  ipcMain.handle("create-budget", async (event, {budgetData}) => {
+    console.log("Received Budget Data:", budgetData);  // Log received data to verify
     return await BudgetService.createBudget(budgetData);
   });
   
   ipcMain.handle("get-budgets", async () => {
     const budgets = await BudgetService.getBudgets();
+    console.log("Budgets fetched from DB:", budgets); // Debugging
     return budgets;
   });
   

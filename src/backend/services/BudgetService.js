@@ -3,6 +3,7 @@ const Budget = require('../models/Budget');
 class BudgetService {
   async createBudget(budgetData) {
     try {
+      console.log("Data to be saved:", budgetData);
       const newBudget = await Budget.create(budgetData);
       return { success: true, budget: newBudget };
     } catch (error) {
@@ -11,7 +12,7 @@ class BudgetService {
     }
   }
 
-  async getBudget() {
+  async getBudgets() {
     try {
       const budgets = await Budget.findAll();
       return { success: true, budgets };
@@ -37,10 +38,11 @@ class BudgetService {
 
   async deleteBudget(id) {
     try {
-      const deletedCount = await Budget.destroy({ where: { id } });
+      const deletedCount = await Budget.destroy({ where: { id: parseInt(id) } });
       if (deletedCount > 0) {
         return { success: true };
       } else {
+        console.error(`No goal found with ID: ${id}`);  // Debugging
         return { error: 'Budget not found or not deleted.' };
       }
     } catch (error) {

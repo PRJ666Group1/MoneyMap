@@ -123,11 +123,59 @@ const ExpenseTracker = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [incomeToExpenseRatio, setIncomeToExpenseRatio] = useState(null);
 
-  // Handle adding expense
-  const handleAddExpense = () => {
+  // Fetch budgets from database
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      try {
+        const result = await window.electron.ipcRenderer.invoke("get-budgets");
+        if (result.success) {
+          const budgets = result.budgets;
+
+          if (budgets.length > 0) {
+            setIncome(budgets[0].income || ""); 
+            setExpenseData(
+              budgets.map((budget) => ({
+                category: budget.category,
+                expense: parseFloat(budget.expense),
+              }))
+            );
+          }
+        } else {
+          console.error("Failed to fetch budgets:", result.error);
+        }
+      } catch (error) {
+        console.error("Error fetching budgets:", error);
+      }
+    };
+
+    fetchBudgets();
+  }, []);
+
+   // Handle adding expense
+  const handleAddExpense = async () => {
     if (!income || !expense || !category) {
       setAlertMessage("Please fill all fields");
       return;
+    }
+
+
+    // Prepare the budget data with income, expense, and category
+    const budgetData = {
+      income: parseFloat(income),  // Assuming income is being set elsewhere in your app
+      expenseAmount: parseFloat(expense),
+      category: category
+    };
+
+    console.log('Sending Budget Data:', budgetData);
+
+    // IPC call to save expense to database
+    try {
+      await window.electron.ipcRenderer.invoke("create-budget", {
+        budgetData
+      });
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      setAlertMessage("Failed to save the expense. Please try again.");
     }
 
     const updatedExpenseData = [...expenseData];
@@ -143,6 +191,8 @@ const ExpenseTracker = () => {
     setExpenseData(updatedExpenseData);
     setExpense(""); // Clear the expense input after adding
     setAlertMessage(""); // Reset alert message
+
+   
   };
 
   // Add custom category with a random color
@@ -165,9 +215,32 @@ const ExpenseTracker = () => {
   };
 
   // Delete specific expense
-  const handleDeleteExpense = (categoryToDelete) => {
-    setExpenseData(expenseData.filter((expense) => expense.category !== categoryToDelete));
+  const handleDeleteExpense = async (id) => {
+    // setExpenseData(expenseData.filter((expense) => expense.category !== categoryToDelete));
+    try {
+      // Sending the category to delete
+      const response = await window.electron.ipcRenderer.invoke("delete-budget", id);
+  
+      if (response.success) {
+        // Re-fetch the updated list of expenses
+        const newExpensesResponse = await window.electron.ipcRenderer.invoke("get-budgets");
+        if (newExpensesResponse.expenses) {
+          setExpenseData(newExpensesResponse.expenses);
+        } else {
+          setAlertMessage("Failed to delete expense, invalid response");
+          console.error("Failed to delete expense, invalid response");
+        }
+      } else {
+        setAlertMessage("Failed to delete expense");
+        console.error("Failed to delete expense");
+      }
+    } catch (err) {
+      console.error("Error deleting expense:", err);
+      setAlertMessage("Error deleting expense");
+    }
   };
+
+   
 
   const totalExpense = expenseData.reduce((acc, curr) => acc + curr.expense, 0);
   const incomeLeft = income - totalExpense;
@@ -248,21 +321,24 @@ const ExpenseTracker = () => {
             <LegendContainer>
               {data.map((entry, index) => (
                 <LegendItem key={index}>
-                  <div
-                    style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: entry.color,
-                      marginRight: 10,
-                    }}
-                  />
-                  <span>{entry.name}: ${entry.value}</span>
-                  {entry.name !== "Income" && (
-                    <Button onClick={() => handleDeleteExpense(entry.name)} style={{ fontSize: "12px", padding: "5px 10px" }}>
-                      Delete
-                    </Button>
-                  )}
-                </LegendItem>
+                    <div
+                      style={{
+                        width: 20,
+                        height: 20,
+                        backgroundColor: entry.color,
+                        marginRight: 10,
+                      }}
+                    />
+                    <span>{entry.name}: ${entry.value}</span>
+                    {entry.name !== "Income" && (
+                      <Button
+                        onClick={() => handleDeleteExpense(entry.id)} // Pass entry.id instead of entry.name
+                        style={{ fontSize: "12px", padding: "5px 10px" }}
+                      >
+                        Delete
+                      </Button>
+                    )}
+                  </LegendItem>
               ))}
             </LegendContainer>
             {incomeToExpenseRatio !== null && (
