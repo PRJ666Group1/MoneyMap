@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
-import styled from "styled-components";
-import dollarImg from "../assets/images/dollar.svg"; // Importing the SVG as a source
 import {
   Container,
   Card,
@@ -20,6 +17,7 @@ import {
   Text
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import { IoIosClose } from "react-icons/io";
 
 // LogTransactions Component
 const LogTransactions = () => {
@@ -39,8 +37,61 @@ const LogTransactions = () => {
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
 
+  // State for edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+
+  // Handle transaction double-click for editing
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction);
+    setCompanyName(transaction.dataValues.companyName);
+    setDate(new Date(transaction.dataValues.date));
+    setStatusValue(transaction.dataValues.status);
+    setAmount(transaction.dataValues.amount);
+    setEditMode(true);
+    openModal();
+  };
+
+  // Handle transaction deletion
+  const handleDeleteTransaction = async (transactionId) => {
+    if (window.confirm("Are you sure you want to delete this transaction? ID: " + transactionId)) {
+      try {
+        await ipcRenderer.invoke("delete-transaction", transactionId);
+        fetchTransactions(); // Refresh the list after deletion
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+        alert("Failed to delete the transaction.");
+      }
+    }
+  };
+
+  // Save or update transaction
+  const handleSaveTransaction = async () => {
+    const formattedDate = new Date(date).toLocaleDateString("en-CA");
+    const transactionData = {
+      companyName,
+      date: formattedDate,
+      status: statusValue,
+      amount,
+    };
+
+    if (editMode && editingTransaction) {
+      // Update existing transaction
+      transactionData.id = editingTransaction.dataValues.id;
+      await ipcRenderer.invoke("update-transaction", transactionData.id, transactionData);
+    } else {
+      // Create new transaction
+      await saveTransaction(transactionData);
+    }
+
+    fetchTransactions();
+    closeModal();
+    resetModalValues();
+    setEditMode(false);
+  };
+
   //Status combobox
-  const statusData = ["Pending", "Successful", "Failed"];
+  const statusData = ["Income", "Expense"];
   const statusCombobox = useCombobox({
     onDropdownClose: () => statusCombobox.resetSelectedOption(),
   });
@@ -99,23 +150,6 @@ const LogTransactions = () => {
     setStatusValue("");
   };
 
-  // Handle adding a new transaction
-  const handleAddTransaction = (companyName, date, status, amount) => {
-    const formattedDate = new Date(date).toLocaleDateString("en-CA"); // Format to "DD-MM-YYYY"
-
-    const newTransaction = {
-      companyName,
-      date: formattedDate,
-      status,
-      amount,
-    };
-
-    saveTransaction(newTransaction); // Save the transaction to the database
-
-    fetchTransactions(); // Fetch the updated list of transactions from the backend
-    //setTestElements((prevElements) => [...prevElements, newTransaction]); // Add new transaction to the list
-  };
-
   return (
     <Container size="xl">
       <Card bg="green.4">
@@ -136,7 +170,7 @@ const LogTransactions = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th><Text fw="bold" span>ID.</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Company Name</Text></Table.Th>
+                <Table.Th><Text fw="bold" span>Name</Text></Table.Th>
                 <Table.Th><Text fw="bold" span>Date</Text></Table.Th>
                 <Table.Th> <Text fw="bold" span>Status</Text></Table.Th>
                 <Table.Th><Text fw="bold" span>Amount</Text></Table.Th>
@@ -144,12 +178,25 @@ const LogTransactions = () => {
             </Table.Thead>
             <Table.Tbody>
               {transactions.map((transaction, index) => (
-                <Table.Tr key={index}>
-                  <Table.Td><Text span>{index + 1}</Text></Table.Td>
+                <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
+                  cursor: "pointer", transition: "background 0.2s ease-in-out",
+                }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                  <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
                   <Table.Td><Text span>{transaction.dataValues.companyName}</Text></Table.Td>
                   <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
                   <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
                   <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+                  <Table.Td>
+                    <Button variant="subtle" color="red" size="xs" onClick={(e) => {
+                      e.stopPropagation(); // Prevent row double-click from triggering edit
+                      console.log("Delete transaction:", transaction.dataValues.id); // Debugging
+                      handleDeleteTransaction(transaction.dataValues.id);
+                    }}>
+                      <IoIosClose size={20} />
+                    </Button>
+                  </Table.Td>
                 </Table.Tr>
               ))}
             </Table.Tbody>
@@ -211,17 +258,9 @@ const LogTransactions = () => {
           />
           <Button
             color="green"
-            onClick={() => {
-              handleAddTransaction(
-                companyName,
-                date.toString(),
-                statusValue,
-                amount
-              );
-              closeModal(); // Close the modal after saving
-            }}
+            onClick={() => handleSaveTransaction()}
           >
-            Save
+            {editMode ? "Update" : "Save"}
           </Button>
         </Stack>
       </Modal>
