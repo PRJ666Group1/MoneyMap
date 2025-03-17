@@ -31,7 +31,7 @@ const linkData = [
   { icon: FaChartLine, label: 'Track Budget, Income & Expenses', to: '/track-budget' }, // Represents financial tracking
   { icon: FaBullseye, label: 'Set Financial Goal', to: '/financial-goal' }, // Represents goal setting
   { icon: FaTachometerAlt, label: 'Financial Goal Dashboard', to: '/financial-goals-dashboard' }, // Represents dashboard/overview
-  { icon: FaCog, label: 'Settings (In Development)' }, // Standard settings icon
+  { icon: FaCog, label: 'Settings (In Development)', to: '/settings' }, // Standard settings icon
 
 ];
 

@@ -1,10 +1,15 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, clipboard  } from "electron";
 import started from "electron-squirrel-startup";
+
+const fs = require("fs");
+const path = require("path");
+
 
 // Import services and initialize the database
 const { initializeDatabase } = require("./database");
 const GoalService = require("./services/GoalService"); // Import the GoalService
 const TransactionService = require("./services/TransactionService"); // Import the TransactionService
+const BudgetService = require("./services/BudgetService"); // Import the BudgetService
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -32,10 +37,41 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+
+// Function to export all data to JSON
+const exportDataToJSON = async () => {
+  try {
+    const goals = await GoalService.getGoals();
+    const transactions = await TransactionService.getTransactions();
+    const budgets = await BudgetService.getBudgets(); // Get budgets data
+
+    const jsonData = {
+      financialGoals: goals,
+      transactions: transactions,
+      budgets: budgets, // Include budgets data in exported JSON
+    };
+
+    const jsonString = JSON.stringify(jsonData, null, 4);
+
+    // Copy JSON string to clipboard
+    clipboard.writeText(jsonString);
+    
+    console.log("Data successfully copied to clipboard!");
+  } catch (error) {
+    console.error("Error exporting data to JSON:", error);
+  }
+};
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(() => {
   initializeDatabase();
+
+  // Convert DB to json and save to clipboard
+  ipcMain.handle("export-json", async (event, goalData) => {
+    return await exportDataToJSON(); // Export data after DB initialization
+  });
+  
 
   // IPC handlers for financial goal CRUD operations using GoalService
   ipcMain.handle("create-goal", async (event, goalData) => {
@@ -74,6 +110,24 @@ app.whenReady().then(() => {
   ipcMain.handle("delete-transaction", async (event, id) => {
     return await TransactionService.deleteTransaction(id);
   });
+
+  ipcMain.handle("create-budget", async (event, budgetData) => {
+    return await BudgetService.createBudget(budgetData);
+  });
+  
+  ipcMain.handle("get-budgets", async () => {
+    const budgets = await BudgetService.getBudgets();
+    return budgets;
+  });
+  
+  ipcMain.handle("update-budget", async (event, id, updatedData) => {
+    return await BudgetService.updateBudget(id, updatedData);
+  });
+  
+  ipcMain.handle("delete-budget", async (event, id) => {
+    return await BudgetService.deleteBudget(id);
+  });
+  
 
   createWindow();
 
