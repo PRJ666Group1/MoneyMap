@@ -234,15 +234,22 @@ class BudgetService {
         
         // If we have expenses, save them as separate entries
         if (budgetData.expenses && budgetData.expenses.length > 0) {
-          // Create array of expense objects
-          const expenseObjects = budgetData.expenses.map(exp => ({
-            income: parseFloat(budgetData.income),
-            category: exp.category,
-            expense: parseFloat(exp.expense)
-          }));
+          // Filter out expenses with zero or invalid values
+          const validExpenses = budgetData.expenses.filter(exp => 
+            parseFloat(exp.expense) > 0
+          );
           
-          // Create all expense entries
-          await Budget.bulkCreate(expenseObjects, { transaction: t });
+          if (validExpenses.length > 0) {
+            // Create array of expense objects with only valid expenses
+            const expenseObjects = validExpenses.map(exp => ({
+              income: parseFloat(budgetData.income),
+              category: exp.category,
+              expense: parseFloat(exp.expense)
+            }));
+            
+            // Create all expense entries
+            await Budget.bulkCreate(expenseObjects, { transaction: t });
+          }
         }
       });
       
