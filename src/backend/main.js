@@ -33,8 +33,8 @@ const createWindow = () => {
   // Load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  // Open the DevTools for debugging
+  mainWindow.webContents.openDevTools();
 };
 
 
@@ -42,8 +42,25 @@ const createWindow = () => {
 const exportDataToJSON = async () => {
   try {
     const goals = await GoalService.getGoals();
+    
+    let budgets;
+    try {
+      budgets = await BudgetService.getBudgets();
+      console.log("Budgets for export:", budgets);
+    } catch (budgetError) {
+      console.error("Error getting budgets for export:", budgetError);
+      budgets = { success: false, error: "Failed to retrieve budget entries.", details: budgetError.message };
+      
+      // Try a test budget creation to debug
+      try {
+        const testResult = await BudgetService.testCreateBudget();
+        console.log("Test budget creation result:", testResult);
+      } catch (testError) {
+        console.error("Test budget creation failed:", testError);
+      }
+    }
+    
     const transactions = await TransactionService.getTransactions();
-    const budgets = await BudgetService.getBudgets(); // Get budgets data
 
     const jsonData = {
       financialGoals: goals,
@@ -57,22 +74,35 @@ const exportDataToJSON = async () => {
     clipboard.writeText(jsonString);
     
     console.log("Data successfully copied to clipboard!");
+    return { success: true };
   } catch (error) {
     console.error("Error exporting data to JSON:", error);
+    return { success: false, error: error.message };
   }
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-app.whenReady().then(() => {
-  initializeDatabase();
+app.whenReady().then(async () => {
+  try {
+    await initializeDatabase();
+    console.log("Database initialized successfully");
+    
+    // Initial test to ensure the budget table exists
+    try {
+      await BudgetService.checkTableExists();
+    } catch (error) {
+      console.error("Error checking budget table:", error);
+    }
+  } catch (error) {
+    console.error("Error during database initialization:", error);
+  }
 
   // Convert DB to json and save to clipboard
-  ipcMain.handle("export-json", async (event, goalData) => {
+  ipcMain.handle("export-json", async (event) => {
     return await exportDataToJSON(); // Export data after DB initialization
   });
   
-
   // IPC handlers for financial goal CRUD operations using GoalService
   ipcMain.handle("create-goal", async (event, goalData) => {
     return await GoalService.createGoal(goalData);
@@ -111,25 +141,80 @@ app.whenReady().then(() => {
     return await TransactionService.deleteTransaction(id);
   });
 
+  // IPC handlers for budget operations
   ipcMain.handle("create-budget", async (event, {budgetData}) => {
-    console.log("Received Budget Data:", budgetData);  // Log received data to verify
-    return await BudgetService.createBudget(budgetData);
+    console.log("Received Budget Data for create:", budgetData);  // Log received data
+    try {
+      const result = await BudgetService.createBudget(budgetData);
+      console.log("Create budget result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in create-budget handler:", error);
+      return { success: false, error: error.message };
+    }
   });
   
   ipcMain.handle("get-budgets", async () => {
-    const budgets = await BudgetService.getBudgets();
-    console.log("Budgets fetched from DB:", budgets); // Debugging
-    return budgets;
+    try {
+      console.log("Attempting to get budgets...");
+      const result = await BudgetService.getBudgets();
+      console.log("Budgets fetched from DB:", result); // Debugging
+      return result;
+    } catch (error) {
+      console.error("Error in get-budgets handler:", error);
+      return { success: false, error: error.message };
+    }
   });
   
-  ipcMain.handle("update-budget", async (event, id, updatedData) => {
-    return await BudgetService.updateBudget(id, updatedData);
+  ipcMain.handle("update-budget", async (event, {id, budgetData}) => {
+    console.log("Updating budget", id, budgetData);
+    try {
+      const result = await BudgetService.updateBudget(id, budgetData);
+      console.log("Update budget result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in update-budget handler:", error);
+      return { success: false, error: error.message };
+    }
   });
   
   ipcMain.handle("delete-budget", async (event, id) => {
-    return await BudgetService.deleteBudget(id);
+    console.log("Deleting budget", id);
+    try {
+      const result = await BudgetService.deleteBudget(id);
+      console.log("Delete budget result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in delete-budget handler:", error);
+      return { success: false, error: error.message };
+    }
   });
   
+  // Handler for saving a complete budget with multiple expenses
+  ipcMain.handle("save-budget", async (event, budgetData) => {
+    console.log("Saving complete budget:", budgetData);
+    try {
+      const result = await BudgetService.saveBudget(budgetData);
+      console.log("Save budget result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in save-budget handler:", error);
+      return { success: false, error: error.message };
+    }
+  });
+  
+  // Handler for clearing all budgets
+  ipcMain.handle("clear-budgets", async () => {
+    console.log("Clearing all budgets");
+    try {
+      const result = await BudgetService.clearBudgets();
+      console.log("Clear budgets result:", result);
+      return result;
+    } catch (error) {
+      console.error("Error in clear-budgets handler:", error);
+      return { success: false, error: error.message };
+    }
+  });
 
   createWindow();
 
