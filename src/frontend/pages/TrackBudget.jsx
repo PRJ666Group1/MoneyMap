@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { PieChart, Pie, Cell, Tooltip } from "recharts";
-
-import { Container, Card, Title, NumberInput, Group, Button, Modal, Input, Stack, Select, Alert, Flex, Box } from '@mantine/core';
+import { Container, Card, Title, NumberInput, Group, Button, Modal, Input, Stack, Select, Grid, ThemeIcon, Text } from '@mantine/core';
+import { PieChart } from '@mantine/charts';
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from '@mantine/hooks';
+import { IoIosClose } from "react-icons/io";
 
 // Utility function to generate random colors
 const generateRandomColor = () => {
@@ -17,8 +17,9 @@ const generateRandomColor = () => {
 
 const ExpenseTracker = () => {
   // Initialize income as a number rather than an empty string
+  const [tempIncome, setTempIncome] = useState(0);
   const [income, setIncome] = useState(0);
-  const [expense, setExpense] = useState("");
+  const [expense, setExpense] = useState(0);
   const [category, setCategory] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [expenseData, setExpenseData] = useState([]);
@@ -33,6 +34,7 @@ const ExpenseTracker = () => {
   const [budgetId, setBudgetId] = useState(null);
   const [categoryModalOpened, { open: categoryModalOpen, close: categoryModalClose }] = useDisclosure(false);
   const [expenseModalOpened, { open: expenseModalOpen, close: expenseModalClose }] = useDisclosure(false);
+  const [updateIncomeModalOpened, { open: updateIncomeModalOpen, close: updateIncomeModalClose }] = useDisclosure(false);
 
   // Fetch budgets from database on component mount
   useEffect(() => {
@@ -363,9 +365,11 @@ const ExpenseTracker = () => {
   // Prepare data for pie chart
   const chartData = [
     { name: "Income Left", value: incomeLeft > 0 ? incomeLeft : 0, color: "#32CD32" },
+
     ...expenseData.map(item => {
       const categoryInfo = categories.find(cat => cat.name === item.category) ||
         { name: item.category, color: "#999999" };
+
       return {
         name: item.category,
         value: item.expense,
@@ -384,80 +388,105 @@ const ExpenseTracker = () => {
   }
 
   return (
-    <>
-      <Container fluid>
-        <Flex justify="space-between" align="start" gap="md">
-          {/* Left Section - Update Budget */}
-          <Card shadow="xs" padding="md" w="50%" bg="green.4">
-            <Title order={2}>Update Budget</Title>
+    <Container>
+      <Card shadow="xs" padding="lg" bg="green.4">
+        <Stack align="center">
+          <Title order={2}>Budget Overview</Title>
+          {chartData.length > 0 ? (
+            <>
+              <PieChart size={300} withLabelsLine labelsPosition="outside" labelsType="percent" withLabels data={chartData} withTooltip />
 
-            <NumberInput placeholder="Monthly Income" allowNegative={false} value={income} onChange={setIncome} />
+              <Stack spacing="xs" w="100%">
+                {chartData.map((entry, index) => (
+                  <Card key={index} bg="green.3" padding="xs" shadow="sm" radius="md">
+                    <Grid align="center">
+                      {/* Name Column */}
+                      <Grid.Col span={6}>
+                        <Group>
+                          <ThemeIcon color={entry.color} radius="xl" />
+                          <Text fw="bold">{entry.name}</Text>
+                        </Group>
+                      </Grid.Col>
 
-            <Group mt="md">
-              <Button onClick={categoryModalOpen}>Add Custom Category</Button>
+                      {/* Value Column */}
+                      <Grid.Col span={3}>
+                        <Text fw={500} c={entry.name === "Income Left" ? "green.9" : "red.9"}>${entry.value.toFixed(2)}</Text>
+                      </Grid.Col>
+
+                      {/* Button Column */}
+                      <Grid.Col span={3} style={{ display: "flex", justifyContent: "flex-end" }}>
+                        {entry.name !== "Income Left" && entry.name !== "Income" && (
+                          <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
+                            <IoIosClose size={20} />
+                          </Button>
+                        )}
+                      </Grid.Col>
+                    </Grid>
+                  </Card>
+                ))}
+              </Stack>
+
+
+
+              {incomeToExpenseRatio !== null && (
+                <Title order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
+              )}
+            </>
+          ) : (
+            <Text>
+              {income > 0 ? "Add expenses to see the budget overview." : "Please enter your monthly income."}
+            </Text>
+          )}
+
+          <Stack mt="md">
+            <Group justify="center">
+              <Button onClick={updateIncomeModalOpen}>Update Income</Button>
               <Button onClick={expenseModalOpen}>Add Expense</Button>
             </Group>
 
-            <Button fullWidth mt="md" onClick={handleSaveBudget}>
-              {budgetId ? "Update Budget" : "Save Budget"}
-            </Button>
-          </Card>
+            <Group>
+              <Button fullWidth color="blue" onClick={handleSaveBudget}>
+                {budgetId ? "Update Budget" : "Save Budget"}
+              </Button>
+            </Group>
 
-          {/* Right Section - Budget Overview */}
-          <Card shadow="xs" padding="md" w="50%" bg="green.4">
-            <Title order={2}>Budget Overview</Title>
+          </Stack>
+        </Stack>
+      </Card>
 
-            {chartData.length > 0 ? (
-              <Stack align="center">
-                <PieChart width={300} height={300}>
-                  <Pie data={chartData} cx="50%" cy="50%" outerRadius={80} fill="#8884d8" dataKey="value" startAngle={180} endAngle={-180}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-                </PieChart>
+      {/* Update Income Modal */}
+      <Modal centered opened={updateIncomeModalOpened} onClose={updateIncomeModalClose} title="Update Income">
+        <Stack>
+          <NumberInput placeholder="Monthly Income" allowNegative={false} value={tempIncome} onChange={setTempIncome} prefix="$" />
 
-                <Stack spacing="xs">
-                  {chartData.map((entry, index) => (
-                    <Group key={index} spacing="xs">
-                      <Box w={20} h={20} bg={entry.color} />
-                      <span>{entry.name}: ${entry.value.toFixed(2)}</span>
-                      {entry.name !== "Income Left" && entry.name !== "Income" && (
-                        <Button compact size="xs" onClick={() => handleDeleteExpense(entry.name)}>Delete</Button>
-                      )}
-                    </Group>
-                  ))}
-                </Stack>
+          <Button fullWidth mt="md" onClick={() => {
+            setIncome(tempIncome);
+            updateIncomeModalClose();
+          }}>
+            Done
+          </Button>
+        </Stack>
+      </Modal>
 
-                {incomeToExpenseRatio !== null && (
-                  <Title order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
-                )}
-              </Stack>
-            ) : (
-              <Box ta="center" py="lg">
-                {income > 0 ? "Add expenses to see the budget overview" : "Please enter your monthly income"}
-              </Box>
-            )}
-          </Card>
-        </Flex>
-      </Container>
+      {/* Add Expense Modal */}
+      <Modal centered opened={expenseModalOpened} onClose={expenseModalClose} title="Add Expense">
+        <Stack>
+          <NumberInput placeholder="Expense Amount" value={expense} onChange={setExpense} prefix="$" />
+          <Select placeholder="Select Category" value={category} onChange={setCategory} data={categories.map((item) => item.name)} />
+
+          <Group justify="space-between">
+            <Button onClick={categoryModalOpen}>Add Custom Category</Button>
+            <Button onClick={handleAddExpense}>Add Expense</Button>
+          </Group>
+        </Stack>
+      </Modal>
 
       {/* Add Custom Category Modal */}
       <Modal centered opened={categoryModalOpened} onClose={categoryModalClose} title="Add Custom Category">
         <Input placeholder="Name of Custom Category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
         <Button fullWidth mt="md" onClick={handleAddCategory}>Add</Button>
       </Modal>
-
-      {/* Add Expense Modal */}
-      <Modal centered opened={expenseModalOpened} onClose={expenseModalClose} title="Add Expense">
-        <Stack>
-          <NumberInput placeholder="Expense Amount" value={expense} onChange={setExpense} />
-          <Select placeholder="Select Category" value={category} onChange={setCategory} data={categories.map((item) => item.name)} />
-          <Button onClick={handleAddExpense}>Add Expense</Button>
-        </Stack>
-      </Modal>
-    </>
+    </Container>
   );
 };
 
