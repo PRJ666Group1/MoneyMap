@@ -3,8 +3,10 @@ import { createRoot } from "react-dom/client";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import styled from "styled-components"; // Import styled-components
 import { MantineProvider } from "@mantine/core"; // Import MantineProvider
+import { Notifications } from '@mantine/notifications';
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
+import '@mantine/notifications/styles.css';
 
 import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSidebar component
 import HomePage from "./pages/HomePage.jsx";
@@ -29,6 +31,7 @@ const MainContent = styled.div`
 function App() {
   return (
     <MantineProvider withGlobalStyles withNormalizeCSS>
+      <Notifications position="top-right" />
       <HashRouter>
         <AppContainer>
           {/* Sidebar */}
