@@ -66,6 +66,7 @@
     "@mantine/core": "^7.17.2",
     "@mantine/hooks": "^7.17.2",
     "@mantine/notifications": "^7.17.2",
+    "@tabler/icons-react": "^3.31.0",
     "dayjs": "^1.11.13",
     "electron-squirrel-startup": "^1.0.1",
     "react": "^19.0.0",

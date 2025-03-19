@@ -77,7 +77,7 @@ const FinancialGoalsDashboard = () => {
                     <TableData>${goal.dataValues.targetAmount}</TableData>
                     <TableData>{goal.dataValues.category}</TableData>
                     <TableData>{goal.dataValues.recurring ? "Yes" : "No"}</TableData>
-                    <TableData>${goal.dataValues.incomeAmount || "N/A"}</TableData>
+                    <TableData>{goal.dataValues.incomeAmount ? `$${goal.dataValues.incomeAmount}` : "N/A"}</TableData>
                     <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
                     <TableData>{new Date(goal.dataValues.targetDate).toLocaleDateString()}</TableData>
                     <TableData>
