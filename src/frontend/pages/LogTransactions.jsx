@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useDisclosure } from "@mantine/hooks";
-import styled from "styled-components";
-import dollarImg from "../assets/images/dollar.svg"; // Importing the SVG as a source
 import {
   Container,
   Card,
@@ -20,6 +17,8 @@ import {
   Text
 } from "@mantine/core";
 import { DatePicker } from "@mantine/dates";
+import { IoIosClose } from "react-icons/io";
+import ErrorModal from "../components/ErrorModal";
 
 // LogTransactions Component
 const LogTransactions = () => {
@@ -31,16 +30,84 @@ const LogTransactions = () => {
   const [error, setError] = useState(null);
 
   //Modal values
-  const [companyName, setCompanyName] = useState("");
+  const [name, setName] = useState("");
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState("");
 
   //Modal
   const [modalOpened, { open: openModal, close: closeModal }] =
     useDisclosure(false);
+  // Error Modal State
+  const [errorModalOpened, { open: openErrorModal, close: closeErrorModal }] =
+    useDisclosure(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  // Delete Modal State
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [deleteTransactionId, setDeleteTransactionId] = useState(null);
+
+  // State for edit mode
+  const [editMode, setEditMode] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState(null);
+
+  // Handle transaction double-click for editing
+  const handleEditTransaction = (transaction) => {
+    setEditingTransaction(transaction);
+    setName(transaction.dataValues.name);
+    setDate(new Date(transaction.dataValues.date));
+    setStatusValue(transaction.dataValues.status);
+    setAmount(transaction.dataValues.amount);
+    setEditMode(true);
+    openModal();
+  };
+
+  // Delete transaction
+  const handleDeleteTransaction = async () => {
+    if (!deleteTransactionId) return;
+    try {
+      await ipcRenderer.invoke("delete-transaction", deleteTransactionId);
+      fetchTransactions(); // Refresh the list after deletion
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      setErrorMessage("Failed to delete transaction.");
+      openErrorModal();
+    } finally {
+      closeDeleteModal();
+    }
+  };
+
+  // Open delete confirmation modal
+  const confirmDeleteTransaction = (transactionId) => {
+    setDeleteTransactionId(transactionId);
+    openDeleteModal();
+  };
+
+  // Save or update transaction
+  const handleSaveTransaction = async () => {
+    const formattedDate = new Date(date).toLocaleDateString("en-CA");
+    const transactionData = {
+      name: name,
+      date: formattedDate,
+      status: statusValue,
+      amount,
+    };
+
+    if (editMode && editingTransaction) {
+      // Update existing transaction
+      transactionData.id = editingTransaction.dataValues.id;
+      await ipcRenderer.invoke("update-transaction", transactionData.id, transactionData);
+    } else {
+      // Create new transaction
+      await saveTransaction(transactionData);
+    }
+
+    fetchTransactions();
+    closeModal();
+    resetModalValues();
+    setEditMode(false);
+  };
 
   //Status combobox
-  const statusData = ["Pending", "Successful", "Failed"];
+  const statusData = ["Income", "Expense"];
   const statusCombobox = useCombobox({
     onDropdownClose: () => statusCombobox.resetSelectedOption(),
   });
@@ -83,37 +150,23 @@ const LogTransactions = () => {
         transactionData
       );
       if (response.error) {
-        alert(`Error: ${response.error}`);
+        setErrorMessage(`Error: ${response.error}`);
+        openErrorModal()
       }
+
     } catch (error) {
       console.error("Error saving transaction:", error);
-      alert("An error occurred while saving the transaction.");
+      setErrorMessage(`Error saving transaction: ${error.message}`);
+      openErrorModal();
     }
   };
 
   // Reset all values to their initial state after the modal closes
   const resetModalValues = () => {
-    setCompanyName("");
+    setName("");
     setAmount(0);
     setDate("");
     setStatusValue("");
-  };
-
-  // Handle adding a new transaction
-  const handleAddTransaction = (companyName, date, status, amount) => {
-    const formattedDate = new Date(date).toLocaleDateString("en-CA"); // Format to "DD-MM-YYYY"
-
-    const newTransaction = {
-      companyName,
-      date: formattedDate,
-      status,
-      amount,
-    };
-
-    saveTransaction(newTransaction); // Save the transaction to the database
-
-    fetchTransactions(); // Fetch the updated list of transactions from the backend
-    //setTestElements((prevElements) => [...prevElements, newTransaction]); // Add new transaction to the list
   };
 
   return (
@@ -136,34 +189,82 @@ const LogTransactions = () => {
             <Table.Thead>
               <Table.Tr>
                 <Table.Th><Text fw="bold" span>ID.</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Company Name</Text></Table.Th>
+                <Table.Th><Text fw="bold" span>Name</Text></Table.Th>
                 <Table.Th><Text fw="bold" span>Date</Text></Table.Th>
                 <Table.Th> <Text fw="bold" span>Status</Text></Table.Th>
                 <Table.Th><Text fw="bold" span>Amount</Text></Table.Th>
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {transactions.map((transaction, index) => (
-                <Table.Tr key={index}>
-                  <Table.Td><Text span>{index + 1}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.companyName}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
-                  <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+              {transactions.length === 0 ?
+                <Table.Tr>
+                  <Table.Td colSpan={5}>
+                    <Text align="center">No transactions found.</Text>
+                  </Table.Td>
                 </Table.Tr>
-              ))}
+                : transactions.map((transaction, index) => (
+                  <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
+                    cursor: "pointer", transition: "background 0.2s ease-in-out",
+                  }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                    <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
+                    <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+                    <Table.Td>
+                      <Button variant="subtle" color="red" size="xs" onClick={(e) => {
+                        e.stopPropagation(); // Prevent row double-click from triggering edit
+                        console.log("Delete transaction:", transaction.dataValues.id); // Debugging
+                        confirmDeleteTransaction(transaction.dataValues.id);
+                      }}>
+                        <IoIosClose size={20} />
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
             </Table.Tbody>
           </Table>
         </Stack>
       </Card>
 
       <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title="Confirm Deletion"
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+      >
+        <Text>Are you sure you want to delete this transaction?</Text>
+        <Group justify="flex-end" mt="md">
+          <Button variant="default" onClick={closeDeleteModal}>
+            Cancel
+          </Button>
+          <Button color="red" onClick={handleDeleteTransaction}>
+            Delete
+          </Button>
+        </Group>
+      </Modal>
+
+
+      <ErrorModal
+        opened={errorModalOpened}
+        message={errorMessage}
+        onClose={() => closeErrorModal()}
+      />
+
+      <Modal
         opened={modalOpened}
         onClose={() => {
+          setEditMode(false);
+          setEditingTransaction(null);
           closeModal();
           resetModalValues();
         }}
-        title="Add New Transaction Manually"
+        title={editingTransaction ? "Edit Transaction" : "Add New Transaction"}
         overlayProps={{
           backgroundOpacity: 0.55,
           blur: 3,
@@ -172,9 +273,9 @@ const LogTransactions = () => {
         <Stack align="center">
           <Autocomplete
             w="100%"
-            placeholder="Company Name"
-            value={companyName}
-            onChange={setCompanyName}
+            placeholder="Name"
+            value={name}
+            onChange={setName}
           />
           <DatePicker placeholder="Date" value={date} onChange={setDate} />
           <Combobox
@@ -211,17 +312,9 @@ const LogTransactions = () => {
           />
           <Button
             color="green"
-            onClick={() => {
-              handleAddTransaction(
-                companyName,
-                date.toString(),
-                statusValue,
-                amount
-              );
-              closeModal(); // Close the modal after saving
-            }}
+            onClick={() => handleSaveTransaction()}
           >
-            Save
+            {editMode ? "Update" : "Save"}
           </Button>
         </Stack>
       </Modal>
