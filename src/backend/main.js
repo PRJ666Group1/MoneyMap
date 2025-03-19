@@ -39,20 +39,12 @@ const createWindow = () => {
 
 import exportData from "./helpers/dataExtract.js";
 
-
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(async () => {
   try {
     await initializeDatabase();
     console.log("Database initialized successfully");
-    
-    // Initial test to ensure the budget table exists
-    try {
-      await BudgetService.checkTableExists();
-    } catch (error) {
-      console.error("Error checking budget table:", error);
-    }
   } catch (error) {
     console.error("Error during database initialization:", error);
   }

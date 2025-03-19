@@ -231,7 +231,7 @@ function FinancialGoal() {
               value={category}
               onChange={(e) => setCategory(e.target.value)}
             >
-              <option value="" disabled selected>Select Category</option>
+              <option value="" disabled selected hidden>Select Category</option>
               <option value="savings">Savings</option>
               <option value="investment">Investment</option>
               <option value="emergency">Emergency Fund</option>
