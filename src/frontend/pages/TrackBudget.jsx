@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, Legend, BarChart, Bar, XAxis, YAxis, CartesianGrid, LineChart, Line  } from "recharts";
 
-// Styled components for layout
+// Styled components for the table
+
 const MainContainer = styled.div`
   padding: 20px;
   background-color: black;  /* Change background color to black */
@@ -65,13 +66,6 @@ const Button = styled.button`
   }
 `;
 
-const PieWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-`;
-
 const LegendContainer = styled.div`
   text-align: center;
   font-size: 14px;
@@ -91,24 +85,94 @@ const Alert = styled.div`
   font-size: 18px;
   font-weight: bold;
 `;
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+`;
+
+const TableHeader = styled.th`
+  background-color: #397d2c;
+  color: white;
+  padding: 10px;
+  text-align: left;
+`;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+`;
+
+const TableCell = styled.td`
+  padding: 10px;
+  border: 1px solid #ddd;
+`;
+
+const ToggleButton = styled.button`
+  background-color:rgb(0, 0, 0);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  margin-right: 10px;
+
+  &:hover {
+    background-color: #2f6b24;
+  }
+`;
+
+const DeleteButton = styled.button`
+  background-color: #ff4d4d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: #cc0000;
+  }
+`;
+
+const PieWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-top: 20px;
+`;
+
+const ChartSelector = styled.select`
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  width: 100%;
+`;
 
 const ExpenseTracker = () => {
-  const [income, setIncome] = useState("");
+  const [income, setIncome] = useState(localStorage.getItem("income") || "");
   const [expense, setExpense] = useState("");
   const [category, setCategory] = useState("");
-  const [expenseData, setExpenseData] = useState([]);
-  const [resetGraph, setResetGraph] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [incomeToExpenseRatio, setIncomeToExpenseRatio] = useState(null);
+  const [expenseData, setExpenseData] = useState(
+    JSON.parse(localStorage.getItem("expenseData")) || []
+  );
+  const [showChart, setShowChart] = useState(false); // Toggle chart visibility
+  const [chartType, setChartType] = useState("Pie"); // Chart type selector
 
-  // Categories and colors
   const categories = [
-    { name: "Rent", color: "#FF6347" }, // Red for Rent
-    { name: "Food", color: "#1E90FF" }, // Blue for Food
-    { name: "Groceries", color: "#FFD700" }, // Yellow for Groceries
-    { name: "Utilities", color: "#8A2BE2" }, // Purple for Utilities
-    { name: "Entertainment", color: "#FF4500" }, // Orange for Entertainment
-    { name: "Others", color: "#FF1493" }, // Pink for Others
+    { name: "Rent", color: "#FF6347" },
+    { name: "Food", color: "#1E90FF" },
+    { name: "Groceries", color: "#FFD700" },
+    { name: "Utilities", color: "#8A2BE2" },
+    { name: "Entertainment", color: "#FF4500" },
+    { name: "Others", color: "#FF1493" },
   ];
 
   const handleAddExpense = () => {
@@ -120,40 +184,29 @@ const ExpenseTracker = () => {
     const newExpense = {
       category,
       expense: parseFloat(expense),
+      date: new Date().toLocaleDateString(), // Add date to expense
     };
 
-    setExpenseData([...expenseData, newExpense]);
-    setExpense(""); // Clear the expense input after adding
-    setAlertMessage(""); // Reset alert message
+    const updatedExpenseData = [...expenseData, newExpense];
+    setExpenseData(updatedExpenseData);
+    localStorage.setItem("expenseData", JSON.stringify(updatedExpenseData));
 
-    setResetGraph(true); // Trigger reset
+    setExpense("");
   };
 
-  const resetPieChart = () => {
-    setResetGraph(false);
-  };
-
-  const totalExpense = expenseData.reduce((acc, curr) => acc + curr.expense, 0);
-  const incomeLeft = income - totalExpense;
-
-  // Calculate the income-to-expense ratio using useEffect
-  useEffect(() => {
-    const ratio = (incomeLeft / income) * 100;
-    setIncomeToExpenseRatio(ratio);
-  }, [income, expenseData]);
-
-  // Simple alert logic
-  useEffect(() => {
-    if (incomeLeft < 0) {
-      setAlertMessage("Warning: Your expenses exceed your income!");
-    } else if (incomeLeft < income * 0.1) {
-      setAlertMessage("Alert: You are close to exceeding your budget!");
+  const handleDeleteRecent = () => {
+    if (expenseData.length === 0) {
+      alert("No expenses to delete!");
+      return;
     }
-  }, [incomeLeft]);
 
-  // Data for the pie chart
+    const updatedExpenseData = expenseData.slice(0, -1); // Remove the last item
+    setExpenseData(updatedExpenseData);
+    localStorage.setItem("expenseData", JSON.stringify(updatedExpenseData));
+  };
+
   const data = [
-    { name: "Income", value: incomeLeft, color: "#32CD32" }, // Green for income
+    { name: "Income", value: income - expenseData.reduce((acc, curr) => acc + curr.expense, 0), color: "#32CD32" },
     ...categories.map((category) => ({
       name: category.name,
       value: expenseData
@@ -163,10 +216,56 @@ const ExpenseTracker = () => {
     })),
   ];
 
+  const renderChart = () => {
+    if (chartType === "Pie") {
+      return (
+        <PieChart width={400} height={400}>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            outerRadius={120}
+            fill="#8884d8"
+            dataKey="value"
+            label
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.color} />
+            ))}
+          </Pie>
+          <Tooltip />
+          <Legend />
+        </PieChart>
+      );
+    } else if (chartType === "Bar") {
+      return (
+        <BarChart width={500} height={300} data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="value" fill="#8884d8" />
+        </BarChart>
+      );
+    } else if (chartType === "Line") {
+      return (
+        <LineChart width={500} height={300} data={data}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="value" stroke="#8884d8" />
+        </LineChart>
+      );
+    }
+  };
+
   return (
     <MainContainer>
       <BudgetBox>
-        {/* Left Section - Update Budget */}
+        {/* Left Section */}
         <LeftBox>
           <h2>Update Budget</h2>
           <Input
@@ -192,53 +291,48 @@ const ExpenseTracker = () => {
           <Button onClick={handleAddExpense}>Add Expense</Button>
         </LeftBox>
 
-        {/* Right Section - Budget Overview */}
+        {/* Right Section */}
         <RightBox>
           <h2>Budget Overview</h2>
-          <PieWrapper>
-            <PieChart width={300} height={300}>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                onAnimationStart={resetPieChart}
-              >
-                {data.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-            <LegendContainer>
-              {data.map((entry, index) => (
-                <LegendItem key={index}>
-                  <div
-                    style={{
-                      width: 20,
-                      height: 20,
-                      backgroundColor: entry.color,
-                      marginRight: 10,
-                    }}
-                  />
-                  <span>{entry.name}: ${entry.value}</span>
-                </LegendItem>
+          <Table>
+            <thead>
+              <tr>
+                <TableHeader>Category</TableHeader>
+                <TableHeader>Amount</TableHeader>
+                <TableHeader>Date</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {expenseData.map((expense, index) => (
+                <TableRow key={index}>
+                  <TableCell>{expense.category}</TableCell>
+                  <TableCell>${expense.expense.toFixed(2)}</TableCell>
+                  <TableCell>{expense.date}</TableCell>
+                </TableRow>
               ))}
-            </LegendContainer>
-            {/* Display Income-to-Expense Ratio */}
-            {incomeToExpenseRatio !== null && (
-              <div style={{ textAlign: "center", marginTop: "10px" }}>
-                <strong>Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</strong>
-              </div>
-            )}
-          </PieWrapper>
+            </tbody>
+          </Table>
+          <div>
+            <ToggleButton onClick={() => setShowChart(!showChart)}>
+              {showChart ? "Hide Chart" : "Show Chart"}
+            </ToggleButton>
+            <DeleteButton onClick={handleDeleteRecent}>Delete Recent</DeleteButton>
+          </div>
+          {showChart && (
+            <>
+              <ChartSelector
+                value={chartType}
+                onChange={(e) => setChartType(e.target.value)}
+              >
+                <option value="Pie">Pie Chart</option>
+                <option value="Bar">Bar Chart</option>
+                <option value="Line">Line Chart</option>
+              </ChartSelector>
+              <PieWrapper>{renderChart()}</PieWrapper>
+            </>
+          )}
         </RightBox>
       </BudgetBox>
-
-      {/* Alert Message */}
-      {alertMessage && <Alert>{alertMessage}</Alert>}
     </MainContainer>
   );
 };
