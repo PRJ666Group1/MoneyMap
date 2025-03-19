@@ -116,7 +116,7 @@ app.whenReady().then(async () => {
   ipcMain.handle("get-budgets", async () => {
     try {
       console.log("Attempting to get budgets...");
-      const result = await BudgetService.getBudgets();
+      const result = await BudgetService.getBudget();
       console.log("Budgets fetched from DB:", result); // Debugging
       return result;
     } catch (error) {
