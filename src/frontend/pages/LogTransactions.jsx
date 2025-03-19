@@ -30,7 +30,7 @@ const LogTransactions = () => {
   const [error, setError] = useState(null);
 
   //Modal values
-  const [companyName, setCompanyName] = useState("");
+  const [name, setName] = useState("");
   const [amount, setAmount] = useState(0);
   const [date, setDate] = useState("");
 
@@ -52,7 +52,7 @@ const LogTransactions = () => {
   // Handle transaction double-click for editing
   const handleEditTransaction = (transaction) => {
     setEditingTransaction(transaction);
-    setCompanyName(transaction.dataValues.companyName);
+    setName(transaction.dataValues.name);
     setDate(new Date(transaction.dataValues.date));
     setStatusValue(transaction.dataValues.status);
     setAmount(transaction.dataValues.amount);
@@ -89,7 +89,7 @@ const LogTransactions = () => {
   const handleSaveTransaction = async () => {
     const formattedDate = new Date(date).toLocaleDateString("en-CA");
     const transactionData = {
-      companyName,
+      name: name,
       date: formattedDate,
       status: statusValue,
       amount,
@@ -167,7 +167,7 @@ const LogTransactions = () => {
 
   // Reset all values to their initial state after the modal closes
   const resetModalValues = () => {
-    setCompanyName("");
+    setName("");
     setAmount(0);
     setDate("");
     setStatusValue("");
@@ -207,7 +207,7 @@ const LogTransactions = () => {
                   onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
                   onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
                   <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.companyName}</Text></Table.Td>
+                  <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
                   <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
                   <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
                   <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
@@ -272,8 +272,8 @@ const LogTransactions = () => {
           <Autocomplete
             w="100%"
             placeholder="Company Name"
-            value={companyName}
-            onChange={setCompanyName}
+            value={name}
+            onChange={setName}
           />
           <DatePicker placeholder="Date" value={date} onChange={setDate} />
           <Combobox
