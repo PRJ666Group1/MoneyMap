@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, clipboard  } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import started from "electron-squirrel-startup";
 
 const fs = require("fs");
@@ -37,49 +37,8 @@ const createWindow = () => {
   // mainWindow.webContents.openDevTools();
 };
 
+import exportData from "./helpers/dataExtract.js";
 
-// Function to export all data to JSON
-const exportDataToJSON = async () => {
-  try {
-    const goals = await GoalService.getGoals();
-    
-    let budgets;
-    try {
-      budgets = await BudgetService.getBudgets();
-      console.log("Budgets for export:", budgets);
-    } catch (budgetError) {
-      console.error("Error getting budgets for export:", budgetError);
-      budgets = { success: false, error: "Failed to retrieve budget entries.", details: budgetError.message };
-      
-      // Try a test budget creation to debug
-      try {
-        const testResult = await BudgetService.testCreateBudget();
-        console.log("Test budget creation result:", testResult);
-      } catch (testError) {
-        console.error("Test budget creation failed:", testError);
-      }
-    }
-    
-    const transactions = await TransactionService.getTransactions();
-
-    const jsonData = {
-      financialGoals: goals,
-      transactions: transactions,
-      budgets: budgets, // Include budgets data in exported JSON
-    };
-
-    const jsonString = JSON.stringify(jsonData, null, 4);
-
-    // Copy JSON string to clipboard
-    clipboard.writeText(jsonString);
-    
-    console.log("Data successfully copied to clipboard!");
-    return { success: true };
-  } catch (error) {
-    console.error("Error exporting data to JSON:", error);
-    return { success: false, error: error.message };
-  }
-};
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -100,7 +59,7 @@ app.whenReady().then(async () => {
 
   // Convert DB to json and save to clipboard
   ipcMain.handle("export-json", async (event) => {
-    return await exportDataToJSON(); // Export data after DB initialization
+    return await exportData(); 
   });
   
   // IPC handlers for financial goal CRUD operations using GoalService

@@ -58,7 +58,7 @@ class BudgetService {
   }
 
   // Method to get all budget entries
-  async getBudgets() {
+  async getBudget() {
     try {
       // Ensure table exists
       await this.initTable();
