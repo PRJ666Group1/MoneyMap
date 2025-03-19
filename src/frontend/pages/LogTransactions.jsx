@@ -271,7 +271,7 @@ const LogTransactions = () => {
         <Stack align="center">
           <Autocomplete
             w="100%"
-            placeholder="Company Name"
+            placeholder="Name"
             value={name}
             onChange={setName}
           />
