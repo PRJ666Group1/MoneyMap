@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Container, Card, Title, NumberInput, Group, Button, Modal, Input, Stack, Select, Grid, ThemeIcon, Text } from '@mantine/core';
-import { PieChart } from '@mantine/charts';
+import { PieChart, BarChart } from '@mantine/charts';
 import { notifications } from "@mantine/notifications";
 import { useDisclosure } from '@mantine/hooks';
 import { IoIosClose } from "react-icons/io";
@@ -394,7 +394,11 @@ const ExpenseTracker = () => {
           <Title order={2}>Budget Overview</Title>
           {chartData.length > 0 ? (
             <>
-              <PieChart size={300} withLabelsLine labelsPosition="outside" labelsType="percent" withLabels data={chartData} withTooltip />
+              <Group justify="center">
+                <PieChart size={300} pieProps={{ opacity: 0.7 }} withLabelsLine labelsPosition="outside" labelsType="percent" withLabels data={chartData} withTooltip />
+                <BarChart fillOpacity={0.7} withYAxis={false} valueFormatter={(value) => "$" + new Intl.NumberFormat('en-US').format(value)}
+                  withBarValueLabel valueLabelProps={{ position: 'inside', fill: 'white' }} tooltipAnimationDuration={200} barLabelColor="dark.9" h={300} data={chartData} dataKey="name" series={[{ name: 'value', color: "black" }]} />
+              </Group>
 
               <Stack spacing="xs" w="100%">
                 {chartData.map((entry, index) => (
@@ -426,8 +430,6 @@ const ExpenseTracker = () => {
                 ))}
               </Stack>
 
-
-
               {incomeToExpenseRatio !== null && (
                 <Title order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
               )}
@@ -457,6 +459,8 @@ const ExpenseTracker = () => {
       {/* Update Income Modal */}
       <Modal centered opened={updateIncomeModalOpened} onClose={updateIncomeModalClose} title="Update Income">
         <Stack>
+          <Text>Current income: <Text span inherit c="green">${income}</Text></Text>
+
           <NumberInput placeholder="Monthly Income" allowNegative={false} value={tempIncome} onChange={setTempIncome} prefix="$" />
 
           <Button fullWidth mt="md" onClick={() => {

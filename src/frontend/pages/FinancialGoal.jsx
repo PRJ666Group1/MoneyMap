@@ -1,125 +1,6 @@
 import React, { useState } from "react";
-import styled from "styled-components";
-import { Container, Card, Button, Group } from "@mantine/core";
-
-// const MainContainer = styled.div`
-//   background-color: white;
-//   padding: 20px;
-//   border-radius: 15px;
-//   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-//   width: 80%;
-//   margin: 20px auto;
-// `;
-
-// const Container = styled.div`
-//   background-color: #397d2c;
-//   border-radius: 15px;
-//   padding: 30px;
-//   color: white;
-// `;
-
-const Title = styled.h3`
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 20px;
-`;
-
-const FormContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
-  gap: 20px;
-  margin-bottom: 20px;
-`;
-
-const FormSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 100%;
-  max-width: 300px;
-`;
-
-const Select = styled.select`
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 100%;
-  max-width: 300px;
-`;
-
-const CheckboxContainer = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const Checkbox = styled.input`
-  margin-right: 10px;
-  transform: scale(1.5);
-`;
-
-const Label = styled.label`
-  margin-left: 5px;
-  font-size: 16px;
-`;
-
-const ButtonContainer = styled.div`
-  text-align: center;
-  margin-top: 20px;
-`;
-
-// const Button = styled.button`
-//   background-color: #397d2c;
-//   color: white;
-//   padding: 10px 20px;
-//   border: none;
-//   border-radius: 8px;
-//   cursor: pointer;
-//   margin: 10px;
-//   font-size: 16px;
-//   border: 1px dotted white;
-
-//   &:hover {
-//     background-color: #2f6b24;
-//   }
-// `;
-
-const DateLabel = styled.label`
-  font-size: 16px;
-  margin-bottom: 5px;
-  text-align: center;
-`;
-
-const MessageContainer = styled.div`
-  height: 30px; /* ✅ Reserve space so content doesn't shift */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  color: ${(props) => (props.type === "success" ? "white" : "red")};
-  visibility: ${(props) =>
-    props.show ? "visible" : "hidden"}; /* ✅ Hide when empty */
-`;
-
-const ErrorMsg = styled.p`
-  color: red;
-  font-size: 14px;
-  //margin: 3px 0;
-  text-align: center;
-  width: 100%;
-  max-width: 320px;
-`;
-
+import { Container, Card, Title, Grid, Input, Checkbox, Button, Text, Select, Stack, NumberInput } from '@mantine/core';
+import { notifications } from "@mantine/notifications";
 
 function FinancialGoal() {
   const { ipcRenderer } = window.electron;
@@ -132,7 +13,6 @@ function FinancialGoal() {
   const [incomeAmount, setIncomeAmount] = useState("");
   const [frequency, setFrequency] = useState("");
   const [targetDate, setTargetDate] = useState("");
-  const [message, setMessage] = useState(null);
   const [errors, setErrors] = useState({});
   const [customCategory, setCustomCategory] = useState("");
 
@@ -142,7 +22,7 @@ function FinancialGoal() {
     if (!targetAmount || parseFloat(targetAmount) <= 0) newErrors.targetAmount = "Target amount must be greater than 0.";
     if (!category) {
       newErrors.category = "Category is required.";
-    } else if (category === "custom" && !customCategory){
+    } else if (category === "custom" && !customCategory) {
       newErrors.customCategory = "Custom category is required.";
     }
     if (recurring) {
@@ -160,8 +40,12 @@ function FinancialGoal() {
 
   // **Save Goal Function**
   const saveGoal = async () => {
-    if (!validate()){
-      setMessage({ type: "error", text: `Please fix the input errors to save a goal` });
+    if (!validate()) {
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message: 'Please fix the input errors to save your goal',
+      })
       return;
     }
 
@@ -170,7 +54,7 @@ function FinancialGoal() {
     const goalData = {
       name: goalName,
       targetAmount: parseFloat(targetAmount) || 0,
-      category: goalCategory, 
+      category: goalCategory,
       recurring,
       incomeAmount: recurring ? parseFloat(incomeAmount) || 0 : null,
       frequency: recurring ? frequency : null,
@@ -180,9 +64,17 @@ function FinancialGoal() {
     try {
       const response = await ipcRenderer.invoke("create-goal", goalData);
       if (response.error) {
-        setMessage({ type: "error", text: `Error: ${response.error}` });
+        notifications.show({
+          color: 'red',
+          title: 'Error',
+          message: response.error,
+        })
       } else {
-        setMessage({ type: "success", text: "Goal saved successfully!" });
+        notifications.show({
+          color: 'green',
+          title: 'Success',
+          message: "Goal saved successfully!",
+        })
 
         // Reset form after success
         setGoalName("");
@@ -194,51 +86,52 @@ function FinancialGoal() {
         setTargetDate("");
       }
 
-      setTimeout(() => setMessage(null), 3000);
     } catch (error) {
       console.error("Error saving goal:", error);
-      setMessage({
-        type: "error",
-        text: "An error occurred while saving the goal.",
-      });
+      notifications.show({
+        color: 'red',
+        title: 'Error',
+        message: "An error occurred while saving the goal.",
+      })
     }
   };
 
   return (
     <Container size="xl">
       <Card bg="green.4">
-        <Title>Create new financial goal</Title>
+        <Title order={3}>Create New Financial Goal</Title>
 
-        <FormContainer>
+        <Grid mt="md" mb="md" gutter="lg">
           {/* First Column */}
-          <FormSection>
-            {errors.goalName && <ErrorMsg>{errors.goalName}</ErrorMsg>}
+          <Grid.Col component={Stack} span={4}>
+            {errors.goalName && <Text c="red" size="sm" align="center">{errors.goalName}</Text>}
             <Input
               type="text"
               placeholder="Goal Name"
               value={goalName}
               onChange={(e) => setGoalName(e.target.value)}
             />
-            {errors.targetAmount && <ErrorMsg>{errors.targetAmount}</ErrorMsg>}
-            <Input
+            {errors.targetAmount && <Text c="red" size="sm" align="center">{errors.targetAmount}</Text>}
+            <NumberInput
               type="number"
               placeholder="Target Amount"
               value={targetAmount}
-              onChange={(e) => setTargetAmount(e.target.value)}
+              onChange={setTargetAmount}
             />
-            {errors.category && <ErrorMsg>{errors.category}</ErrorMsg>}
+            {errors.category && <Text c="red" size="sm" align="center">{errors.category}</Text>}
             <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
-            >
-              <option value="" disabled selected hidden>Select Category</option>
-              <option value="savings">Savings</option>
-              <option value="investment">Investment</option>
-              <option value="emergency">Emergency Fund</option>
-              <option value="custom">Custom</option> {/* Add Custom Option */}
-            </Select>
-            {errors.customCategory && <ErrorMsg>{errors.customCategory}</ErrorMsg>}
-            {category === "custom" && (  
+              onChange={setCategory}
+              placeholder="Select Category"
+              data={[
+                { value: "savings", label: "Savings" },
+                { value: "investment", label: "Investment" },
+                { value: "emergency", label: "Emergency Fund" },
+                { value: "custom", label: "Custom" },
+              ]}
+            />
+            {errors.customCategory && <Text color="red" size="sm" align="center">{errors.customCategory}</Text>}
+            {category === "custom" && (
               <Input
                 type="text"
                 placeholder="Enter Custom Category"
@@ -246,19 +139,16 @@ function FinancialGoal() {
                 onChange={(e) => setCustomCategory(e.target.value)}
               />
             )}
-          </FormSection>
+          </Grid.Col>
 
           {/* Second Column */}
-          <FormSection>
-            <CheckboxContainer>
-              <Checkbox
-                type="checkbox"
-                checked={recurring}
-                onChange={(e) => setRecurring(e.target.checked)}
-              />
-              <Label>Enable Automatic Recurring Contributions</Label>
-            </CheckboxContainer>
-            {recurring && errors.incomeAmount && <ErrorMsg>{errors.incomeAmount}</ErrorMsg>}
+          <Grid.Col component={Stack} span={4}>
+            <Checkbox
+              checked={recurring}
+              onChange={(e) => setRecurring(e.target.checked)}
+              label="Enable Automatic Recurring Contributions"
+            />
+            {recurring && errors.incomeAmount && <Text color="red" size="sm" align="center">{errors.incomeAmount}</Text>}
             <Input
               type="number"
               placeholder="Amount of Income"
@@ -266,38 +156,36 @@ function FinancialGoal() {
               onChange={(e) => setIncomeAmount(e.target.value)}
               disabled={!recurring}
             />
-            {recurring && errors.frequency && <ErrorMsg>{errors.frequency}</ErrorMsg>}
+            {recurring && errors.frequency && <Text color="red" size="sm" align="center">{errors.frequency}</Text>}
             <Select
               value={frequency}
-              onChange={(e) => setFrequency(e.target.value)}
+              onChange={setFrequency}
+              placeholder="Select Frequency"
               disabled={!recurring}
-            >
-              <option value="" disabled selected>Select Frequency</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-            </Select>
-          </FormSection>
+              data={[
+                { value: "daily", label: "Daily" },
+                { value: "weekly", label: "Weekly" },
+                { value: "monthly", label: "Monthly" },
+                { value: "quarterly", label: "Quarterly" },
+              ]}
+            />
+          </Grid.Col>
 
           {/* Third Column */}
-          <FormSection>
-            {errors.targetDate && <ErrorMsg>{errors.targetDate}</ErrorMsg>}
-            <DateLabel htmlFor="target-date">Target Date</DateLabel>
+          <Grid.Col component={Stack} span={4}>
+            {errors.targetDate && <Text color="red" size="sm" align="center">{errors.targetDate}</Text>}
+            <Text size="sm" align="center">Target Date</Text>
             <Input
               id="target-date"
               type="date"
               value={targetDate}
               onChange={(e) => setTargetDate(e.target.value)}
             />
-          </FormSection>
-        </FormContainer>
-        <MessageContainer type={message?.type} show={!!message}>
-          {message?.text}
-        </MessageContainer>
+          </Grid.Col>
+        </Grid>
+
         {/* Button Section */}
-        <ButtonContainer>
-          <Button onClick={saveGoal}>Save New Goal</Button>
-        </ButtonContainer>
+        <Button onClick={saveGoal} fullWidth>Save New Goal</Button>
       </Card>
     </Container>
   );

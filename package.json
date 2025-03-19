@@ -61,6 +61,7 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@fontsource-variable/montserrat": "^5.2.5",
     "@mantine/charts": "^7.17.2",
     "@mantine/core": "^7.17.2",
     "@mantine/hooks": "^7.17.2",

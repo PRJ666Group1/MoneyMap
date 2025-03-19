@@ -60,10 +60,6 @@ const LogTransactions = () => {
     openModal();
   };
 
-  useEffect(() => {
-    console.log("ERROR MODAL OPENED:", errorModalOpened);
-  }, [errorModalOpened]);
-
   // Delete transaction
   const handleDeleteTransaction = async () => {
     if (!deleteTransactionId) return;
@@ -200,28 +196,34 @@ const LogTransactions = () => {
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {transactions.map((transaction, index) => (
-                <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
-                  cursor: "pointer", transition: "background 0.2s ease-in-out",
-                }}
-                  onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
-                  <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
-                  <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
-                  <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
-                  <Table.Td>
-                    <Button variant="subtle" color="red" size="xs" onClick={(e) => {
-                      e.stopPropagation(); // Prevent row double-click from triggering edit
-                      console.log("Delete transaction:", transaction.dataValues.id); // Debugging
-                      confirmDeleteTransaction(transaction.dataValues.id);
-                    }}>
-                      <IoIosClose size={20} />
-                    </Button>
+              {transactions.length === 0 ?
+                <Table.Tr>
+                  <Table.Td colSpan={5}>
+                    <Text align="center">No transactions found.</Text>
                   </Table.Td>
                 </Table.Tr>
-              ))}
+                : transactions.map((transaction, index) => (
+                  <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
+                    cursor: "pointer", transition: "background 0.2s ease-in-out",
+                  }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                    <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
+                    <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
+                    <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+                    <Table.Td>
+                      <Button variant="subtle" color="red" size="xs" onClick={(e) => {
+                        e.stopPropagation(); // Prevent row double-click from triggering edit
+                        console.log("Delete transaction:", transaction.dataValues.id); // Debugging
+                        confirmDeleteTransaction(transaction.dataValues.id);
+                      }}>
+                        <IoIosClose size={20} />
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
             </Table.Tbody>
           </Table>
         </Stack>

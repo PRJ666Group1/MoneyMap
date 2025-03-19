@@ -1,12 +1,15 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { HashRouter, Routes, Route } from "react-router-dom";
-import { Container, Flex, MantineProvider } from "@mantine/core"; // Import MantineProvider
+import { Container, Flex, MantineProvider, createTheme } from "@mantine/core"; // Import MantineProvider
 import { Notifications } from '@mantine/notifications';
 import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import '@mantine/notifications/styles.css';
 import '@mantine/charts/styles.css';
+
+// Supports weights 100-900
+import '@fontsource-variable/montserrat';
 
 import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSidebar component
 import HomePage from "./pages/HomePage.jsx";
@@ -16,9 +19,14 @@ import LogTransactions from "./pages/LogTransactions.jsx";
 import TrackBudget from "./pages/TrackBudget.jsx"; // Import TrackBudget
 import Settings from "./pages/Settings.jsx"; // Import Settings
 
+const theme = createTheme({
+  primaryColor: "green",
+  fontFamily: "Montserrat Variable",
+});
+
 function App() {
   return (
-    <MantineProvider withGlobalStyles withNormalizeCSS>
+    <MantineProvider theme={theme} withGlobalStyles withNormalizeCSS>
       <Notifications position="top-right" />
       <HashRouter>
         <Flex mih="100vh" bg="gray.9">
