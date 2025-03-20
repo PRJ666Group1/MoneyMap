@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Card, Flex, Title, Image, Text, Grid, Progress, List, ThemeIcon } from '@mantine/core';
+import { Container, Card, Flex, Title, Image, Text, Grid, Progress, List, ThemeIcon, Divider } from '@mantine/core';
 import { IconCheck, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
 import styled from 'styled-components';
 
@@ -8,22 +8,80 @@ import home2 from '/public/images/mm_home2.jpg';
 import home3 from '/public/images/mm_home3.jpg';
 
 // Styled components
-const SectionTitle = styled(Title)`
-  font-size: 1.8rem;
-  color: #333;
+const AppContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #ffffff; /* Clean white background */
+  padding: 30px;
+  font-family: 'Montserrat', sans-serif;
+`;
+
+const HeroSection = styled.div`
+  background: linear-gradient(135deg, #397d2c, #69db7c);
+  color: white;
+  text-align: center;
+  padding: 50px 20px;
+  border-radius: 20px;
+  margin-bottom: 40px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+`;
+
+const HeroTitle = styled.h1`
+  font-size: 3rem;
+  font-weight: 700;
   margin-bottom: 10px;
 `;
 
-const SectionSubTitle = styled(Text)`
-  font-size: 1rem;
+const HeroSubtitle = styled.p`
+  font-size: 1.2rem;
+  font-weight: 400;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 600;
   color: #333;
-  font-weight: bold;
+  margin-bottom: 20px;
 `;
 
 const SectionCard = styled(Card)`
-  width: 100%;
-  margin-bottom: 20px;
+  background-color: #f9f9f9;
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const FeatureCard = styled(Card)`
+  background-color: #ffffff;
+  border-radius: 15px;
   padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const FeatureImage = styled(Image)`
+  border-radius: 10px;
+  margin-bottom: 15px;
+`;
+
+const FeatureTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #397d2c;
+  margin-bottom: 10px;
+`;
+
+const FeatureDescription = styled.p`
+  font-size: 1rem;
+  color: #555;
 `;
 
 const BulletList = styled(List)`
@@ -31,11 +89,17 @@ const BulletList = styled(List)`
   padding: 0;
 `;
 
+const RecommendationItem = styled(List.Item)`
+  font-size: 1rem;
+  color: #333;
+  margin-bottom: 10px;
+`;
 
-
+const ProgressBar = styled(Progress)`
+  margin-top: 10px;
+`;
 
 const HomePage = () => {
-
   // Dummy data for now
   const [data, setData] = useState(null);
 
@@ -77,123 +141,105 @@ const HomePage = () => {
 
   if (!data) return <Text>Loading financial data...</Text>;
 
-  
   return (
-    <Container size="xl" py="xl">
-  
+    <AppContainer>
       {/* Hero Section */}
-      <Card shadow="md" p="xl" bg="green.4" radius="md">
-        <Flex direction="column" justify="center" align="center" gap="md">
-          <Text fz={50}>MoneyMap</Text>
-          <Text fw={500} size="lg" c="dark.6">Track, manage, and grow your finances effortlessly.</Text>
-        </Flex>
-      </Card>
+      <HeroSection>
+        <HeroTitle>MoneyMap</HeroTitle>
+        <HeroSubtitle>Track, manage, and grow your finances effortlessly.</HeroSubtitle>
+      </HeroSection>
 
       {/* Features Section */}
-      <Grid mt="xl" gutter="lg">
+      <Grid gutter="lg">
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Card bg="green.4" shadow="sm" p="md" radius="md">
-            <Image src={home1} alt="Feature 1" radius="md" />
-            <Title order={3} mt="md">Smart Budgeting</Title>
-            <Text size="sm" c="dark.6">Plan your expenses and save efficiently.</Text>
-          </Card>
+          <FeatureCard>
+            <FeatureImage src={home1} alt="Feature 1" />
+            <FeatureTitle>Smart Budgeting</FeatureTitle>
+            <FeatureDescription>Plan your expenses and save efficiently.</FeatureDescription>
+          </FeatureCard>
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Card bg="green.4" shadow="sm" p="md" radius="md">
-            <Image src={home2} alt="Feature 2" radius="md" />
-            <Title order={3} mt="md">Expense Tracking</Title>
-            <Text size="sm" c="dark.6">Monitor spending in real-time.</Text>
-          </Card>
+          <FeatureCard>
+            <FeatureImage src={home2} alt="Feature 2" />
+            <FeatureTitle>Expense Tracking</FeatureTitle>
+            <FeatureDescription>Monitor spending in real-time.</FeatureDescription>
+          </FeatureCard>
         </Grid.Col>
 
         <Grid.Col span={{ base: 12, md: 4 }}>
-          <Card bg="green.4" shadow="sm" p="md" radius="md">
-            <Image src={home3} alt="Feature 3" radius="md" />
-            <Title order={3} mt="md">Financial Insights</Title>
-            <Text size="sm" c="dark.6">Get detailed reports and analytics.</Text>
-          </Card>
+          <FeatureCard>
+            <FeatureImage src={home3} alt="Feature 3" />
+            <FeatureTitle>Financial Insights</FeatureTitle>
+            <FeatureDescription>Get detailed reports and analytics.</FeatureDescription>
+          </FeatureCard>
         </Grid.Col>
       </Grid>
 
-
-
-
-      {/* ---------------- AI Section ---------------*/}
-
-
-      {/* Financial Summary section */}
-      <SectionCard bg="green.4" mt="50px">
+      {/* Financial Summary Section */}
+      <SectionCard>
         <SectionTitle>Financial Summary</SectionTitle>
         <Text>Total Income: ${data.financial_summary.total_income}</Text>
         <Text>Total Expenses: ${data.financial_summary.total_expenses}</Text>
         <Text>Net Balance: ${data.financial_summary.net_balance}</Text>
 
-          {/* conditional bold & red when over_budget spending  */}
-        <SectionSubTitle size="md" mt="sm"> Spending Comparison </SectionSubTitle>
+        <Divider my="sm" />
+
+        <SectionTitle>Spending Comparison</SectionTitle>
         {Object.entries(data.financial_summary.spending_comparison).map(([category, details]) => (
-          <Flex key={category} gap="sm">
-            <Text>{`> ${category}`}: </Text>
-            <Text color={details.over_budget ? 'red.7' : 'black'} style={{ fontWeight: details.over_budget ? 'bold' : 'normal' }}>
-                ${details.actual} / ${details.budgeted}
+          <Flex key={category} justify="space-between" align="center" mb="sm">
+            <Text>{category}</Text>
+            <Text color={details.over_budget ? 'red' : 'green'}>
+              ${details.actual} / ${details.budgeted}
             </Text>
           </Flex>
         ))}
       </SectionCard>
 
-
-
-      {/* Recurring Expense Analysis section*/}
-      <SectionCard bg="green.4">
+      {/* Recurring Expense Analysis Section */}
+      <SectionCard>
         <SectionTitle>Recurring Expenses</SectionTitle>
         <Text>Total Monthly Recurring: ${data.recurring_expense_analysis.total_recurring_monthly}</Text>
         {Object.entries(data.recurring_expense_analysis.recurring_expenses).map(([expense, cost]) => (
-          <Text key={expense}> • {expense}: ${cost}</Text>
+          <Text key={expense}>• {expense}: ${cost}</Text>
         ))}
       </SectionCard>
 
-
-
-      {/* Financial Goals */}
-
-          {/* Color of progressBar depends on % of progress */}
-      <SectionCard bg="green.4">
+      {/* Financial Goals Section */}
+      <SectionCard>
         <SectionTitle>Financial Goals</SectionTitle>
         {Object.entries(data.financial_goals_analysis.goals_progress).map(([goal, details]) => (
           <Card key={goal} shadow="sm" radius="md" p="sm" mt="sm">
             <Text>{goal}</Text>
             <Text size="sm">Target: ${details.targetAmount} | Time Left: {details.timeLeft} months</Text>
-            <Progress value={details.progress} size="lg" color={details.progress < 50 ? 'red.7' : 'green.8'} />
+            <ProgressBar value={details.progress} size="lg" color={details.progress < 50 ? 'red' : 'green'} />
           </Card>
         ))}
       </SectionCard>
 
-      {/* Financial Recommendations */}
-
-          {/* to implement later: conditional icon rendering based on advice type */}
-          {/* if congrats advice on wise financing, ThemeIcon color="green.8" & IconCheck*/}
-          {/* if advice on fin mistakes, ThemeIcon color="red.8" & IconTrendingDown*/}
-      <SectionCard bg="green.4">
+      {/* Financial Recommendations Section */}
+      <SectionCard>
         <SectionTitle>Financial Recommendations</SectionTitle>
-        <BulletList spacing="xs" icon={<ThemeIcon color="green.8" size={24} radius="xl"><IconCheck size="1rem" /></ThemeIcon>}>
+        <BulletList>
           {data.financial_recommendations.map((rec, index) => (
-            <List.Item key={index}>{rec}</List.Item>
+            <RecommendationItem key={index}>
+              <ThemeIcon color="green" size={24} radius="xl">
+                <IconCheck size="1rem" />
+              </ThemeIcon>
+              {rec}
+            </RecommendationItem>
           ))}
         </BulletList>
-          
         {/* Hardcoded Icon for Bad Advice (Trending Down) */}
-        <hr></hr>
+        <hr />
         <BulletList spacing="xs" icon={<ThemeIcon color="red.8" size={24} radius="xl"><IconTrendingDown size="1rem" /></ThemeIcon>}>
           <List.Item>
             You should review your spending habits on unnecessary subscriptions.
           </List.Item>
         </BulletList>
-        {/* Hardcoded Icon for Bad Advice (Trending Down) */}
-
       </SectionCard>
-
-    </Container>
+    </AppContainer>
   );
-};  
+};
 
 export default HomePage;

@@ -11,14 +11,14 @@ const FinancialGoalsDashboard = () => {
   useEffect(() => {
     const fetchGoals = async () => {
       try {
-        const response = await window.electron.ipcRenderer.invoke('get-goals');
+        const response = await window.electron.ipcRenderer.invoke("get-goals");
         console.log("Response from IPC:", response); // Debugging
 
         // Ensure goals is an array
         setGoals(Array.isArray(response.goals) ? response.goals : []);
       } catch (err) {
-        setError('Failed to fetch goals.');
-        console.error('Error fetching goals:', err);
+        setError("Failed to fetch goals.");
+        console.error("Error fetching goals:", err);
       } finally {
         setLoading(false);
       }
@@ -27,7 +27,6 @@ const FinancialGoalsDashboard = () => {
     fetchGoals();
   }, []);
 
-  // Delete a goal
   // Delete a goal and refresh the goal list
   const handleDelete = async (id) => {
     try {
@@ -35,7 +34,7 @@ const FinancialGoalsDashboard = () => {
       if (response.success) {
         // Re-fetch the updated list of goals from the backend
         const newGoalsResponse = await window.electron.ipcRenderer.invoke("get-goals");
-        setGoals(newGoalsResponse.goals);  // Update state with the new goals
+        setGoals(newGoalsResponse.goals); // Update state with the new goals
       } else {
         alert("Failed to delete goal");
       }
@@ -44,111 +43,176 @@ const FinancialGoalsDashboard = () => {
     }
   };
 
-
   if (loading) return <Loading>Loading...</Loading>;
   if (error) return <Error>{error}</Error>;
 
   return (
-    <Container size="xl">
-      <Card bg="green.4">
-        <Title>Financial Goals</Title>
-        {goals.length === 0 ? (
-          <NoGoals>No financial goals found.</NoGoals>
-        ) : (
-          <GoalsTable>
-            <thead>
-              <tr>
-                <TableHeader>Name</TableHeader>
-                <TableHeader>Target Amount</TableHeader>
-                <TableHeader>Category</TableHeader>
-                <TableHeader>Recurring</TableHeader>
-                <TableHeader>Income Amount</TableHeader>
-                <TableHeader>Frequency</TableHeader>
-                <TableHeader>Target Date</TableHeader>
-                <TableHeader>Actions</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {goals.map(goal => {
-                console.log("Rendering goal:", goal.dataValues); // Debugging
-                return (
-                  <tr key={goal.dataValues.id}>
+    <PageContainer>
+      {/* Header */}
+      <Header>
+        <HeaderTitle>Financial Goals Dashboard</HeaderTitle>
+        <HeaderSubtitle>Track and manage your financial goals effectively</HeaderSubtitle>
+      </Header>
+
+      {/* Main Content */}
+      <ContentContainer>
+        <StyledCard>
+          <Title>Your Financial Goals</Title>
+
+          {goals.length === 0 ? (
+            <NoGoalsMessage>No financial goals found.</NoGoalsMessage>
+          ) : (
+            <GoalsTable>
+              <thead>
+                <tr>
+                  <TableHeader>Name</TableHeader>
+                  <TableHeader>Target Amount</TableHeader>
+                  <TableHeader>Category</TableHeader>
+                  <TableHeader>Recurring</TableHeader>
+                  <TableHeader>Income Amount</TableHeader>
+                  <TableHeader>Frequency</TableHeader>
+                  <TableHeader>Target Date</TableHeader>
+                  <TableHeader>Actions</TableHeader>
+                </tr>
+              </thead>
+              <tbody>
+                {goals.map((goal) => (
+                  <TableRow key={goal.dataValues.id}>
                     <TableData>{goal.dataValues.name}</TableData>
                     <TableData>${goal.dataValues.targetAmount}</TableData>
                     <TableData>{goal.dataValues.category}</TableData>
                     <TableData>{goal.dataValues.recurring ? "Yes" : "No"}</TableData>
-                    <TableData>{goal.dataValues.incomeAmount ? `$${goal.dataValues.incomeAmount}` : "N/A"}</TableData>
-                    <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
-                    <TableData>{new Date(goal.dataValues.targetDate).toLocaleDateString()}</TableData>
                     <TableData>
-                      <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>Delete</DeleteButton>
+                      {goal.dataValues.incomeAmount
+                        ? `$${goal.dataValues.incomeAmount}`
+                        : "N/A"}
                     </TableData>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </GoalsTable>
-        )}
-      </Card>
-    </Container>
+                    <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
+                    <TableData>
+                      {new Date(goal.dataValues.targetDate).toLocaleDateString()}
+                    </TableData>
+                    <TableData>
+                      <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>
+                        Delete
+                      </DeleteButton>
+                    </TableData>
+                  </TableRow>
+                ))}
+              </tbody>
+            </GoalsTable>
+          )}
+        </StyledCard>
+      </ContentContainer>
+    </PageContainer>
   );
 };
 
 export default FinancialGoalsDashboard;
 
 // Styled Components
+const PageContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f9f9f9; /* Light gray background */
+  padding: 20px;
+  font-family: "Montserrat", sans-serif;
+`;
 
-// const DashboardContainer = styled.div`
-//   padding: 20px;
-// `;
+const Header = styled.div`
+  background: linear-gradient(135deg, #397d2c, #69db7c);
+  color: white;
+  text-align: center;
+  padding: 30px;
+  border-radius: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
+
+const HeaderTitle = styled.h1`
+  font-size: 2.5rem;
+  font-weight: 700;
+`;
+
+const HeaderSubtitle = styled.p`
+  font-size: 1.2rem;
+  font-weight: 400;
+`;
+
+const ContentContainer = styled(Container)`
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+
+const StyledCard = styled(Card)`
+  background-color: white;
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+`;
 
 const Title = styled.h2`
-  font-size: 2em;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
   margin-bottom: 20px;
 `;
 
-const Loading = styled.div`
-  font-size: 1.5em;
+const NoGoalsMessage = styled(Text)`
+  font-size: 1.2rem;
   color: #555;
-`;
-
-const Error = styled.div`
-  font-size: 1.5em;
-  color: red;
-`;
-
-const NoGoals = styled.p`
-  font-size: 1.2em;
-  color: #333;
+  text-align: center;
+  margin-top: 20px;
 `;
 
 const GoalsTable = styled.table`
   width: 100%;
   border-collapse: collapse;
+  margin-top: 20px;
 `;
 
 const TableHeader = styled.th`
+  background-color: #397d2c;
+  color: white;
   padding: 10px;
   text-align: left;
-  border: 1px solid #ccc;
-  background-color: var(--mantine-color-green-9);
+`;
+
+const TableRow = styled.tr`
+  &:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  &:hover {
+    background-color: #e6ffe6;
+    cursor: pointer;
+  }
 `;
 
 const TableData = styled.td`
   padding: 10px;
-  text-align: left;
-  border: 1px solid #ccc;
-    background-color: var(--mantine-color-green-6);
+  border: 1px solid #ddd;
 `;
 
 const DeleteButton = styled.button`
-  background-color: var(--mantine-color-red-8);
+  background-color: #ff4d4d;
   color: white;
   padding: 5px 10px;
   border: none;
   cursor: pointer;
 
   &:hover {
-    background-color: var(--mantine-color-red-6);
+    background-color: #ff6666;
   }
+`;
+
+const Loading = styled.div`
+  font-size: 1.5rem;
+  color: #555;
+  text-align: center;
+`;
+
+const Error = styled.div`
+  font-size: 1.5rem;
+  color: red;
+  text-align: center;
 `;
