@@ -121,7 +121,7 @@ function FinancialGoal() {
                 />
                 {errors.targetAmount && <ErrorText>{errors.targetAmount}</ErrorText>}
                 <NumberInput
-                  type="number"
+                  type="text" // fix for the error that appear when selecting with arrow button
                   placeholder="Target Amount"
                   value={targetAmount}
                   onChange={setTargetAmount}
@@ -215,24 +215,29 @@ const PageContainer = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background-color: #f9f9f9;
+  background: linear-gradient(135deg, #2b5f20, #54c166);
   padding: 40px;
 `;
 
 const Header = styled.div`
   text-align: center;
   margin-bottom: 40px;
+  background: linear-gradient(135deg, #397d2c, #69db7c);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  width: 100%;
 `;
 
 const HeaderTitle = styled.h1`
   font-size: 3rem;
   font-weight: 700;
-  color: #397d2c;
+  color: #ffffff;
 `;
 
 const HeaderSubtitle = styled.p`
   font-size: 1.2rem;
-  color: #555;
+  color: #fbf7f7;
 `;
 
 const StyledContainer = styled(Container)`

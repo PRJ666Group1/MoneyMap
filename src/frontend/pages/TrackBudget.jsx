@@ -347,7 +347,7 @@ const ExpenseTracker = () => {
       <Grid>
         {/* Left Section: Controls */}
         <Grid.Col span={4}>
-          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#f8f9fa" }}>
+          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#d9dee3" }}>
             <Stack>
               <Title order={3} style={{ color: "#333" }}>Budget Controls</Title>
 
@@ -405,7 +405,7 @@ const ExpenseTracker = () => {
 
         {/* Right Section: Table and Charts */}
         <Grid.Col span={8}>
-          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#f8f9fa" }}>
+          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#d9dee3" }}>
             <Stack>
               <Title order={3} style={{ color: "#333" }}>Budget Overview</Title>
 

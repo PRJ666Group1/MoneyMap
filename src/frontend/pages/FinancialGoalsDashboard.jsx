@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Container, Card } from "@mantine/core";
+import { Container, Card, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 const FinancialGoalsDashboard = () => {
   const [goals, setGoals] = useState([]);
@@ -35,11 +36,25 @@ const FinancialGoalsDashboard = () => {
         // Re-fetch the updated list of goals from the backend
         const newGoalsResponse = await window.electron.ipcRenderer.invoke("get-goals");
         setGoals(newGoalsResponse.goals); // Update state with the new goals
+        notifications.show({
+          color: "green",
+          title: "Success",
+          message: "Goal deleted successfully!",
+        });
       } else {
-        alert("Failed to delete goal");
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: response.error,
+        });
       }
     } catch (err) {
       console.error("Error deleting goal:", err);
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "An error occurred while deleting the goal.",
+      });
     }
   };
 
@@ -57,7 +72,9 @@ const FinancialGoalsDashboard = () => {
       {/* Main Content */}
       <ContentContainer>
         <StyledCard>
-          <Title>Your Financial Goals</Title>
+        {goals.length > 0 && (
+          <Title>Financial Goals</Title>
+        )}
 
           {goals.length === 0 ? (
             <NoGoalsMessage>No financial goals found.</NoGoalsMessage>
@@ -114,7 +131,7 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f9f9f9; /* Light gray background */
+  background: linear-gradient(135deg, #2b5f20, #54c166);
   padding: 20px;
   font-family: "Montserrat", sans-serif;
 `;
@@ -162,7 +179,6 @@ const NoGoalsMessage = styled(Text)`
   font-size: 1.2rem;
   color: #555;
   text-align: center;
-  margin-top: 20px;
 `;
 
 const GoalsTable = styled.table`

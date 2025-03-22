@@ -12,7 +12,7 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #ffffff; /* Clean white background */
+  background: linear-gradient(135deg, #397d2c, #69db7c);
   padding: 30px;
   font-family: 'Montserrat', sans-serif;
 `;
@@ -177,7 +177,7 @@ const HomePage = () => {
       </Grid>
 
       {/* Financial Summary Section */}
-      <SectionCard>
+      <SectionCard style={{marginTop: "3rem"}}>
         <SectionTitle>Financial Summary</SectionTitle>
         <Text>Total Income: ${data.financial_summary.total_income}</Text>
         <Text>Total Expenses: ${data.financial_summary.total_expenses}</Text>

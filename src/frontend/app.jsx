@@ -29,7 +29,7 @@ function App() {
     <MantineProvider theme={theme} withGlobalStyles withNormalizeCSS>
       <Notifications position="top-right" />
       <HashRouter>
-        <Flex mih="100vh" bg="white">
+        <Flex mih="100vh" bg="gray.9">
           {/* Sidebar */}
           <LeftSidebar />
 
