@@ -298,6 +298,39 @@ const ExpenseTracker = () => {
   const totalExpense = expenseData.reduce((acc, curr) => acc + curr.expense, 0);
   const incomeLeft = parseFloat(income) - totalExpense;
 
+  // Calculate income to expense ratio
+  useEffect(() => {
+    const incomeValue = parseFloat(income);
+    if (incomeValue > 0) {
+      // Calculate percentage of income spent
+      const percentageSpent = (totalExpense / incomeValue) * 100;
+      setIncomeToExpenseRatio(percentageSpent);
+    } else {
+      setIncomeToExpenseRatio(0);
+    }
+  }, [income, totalExpense]);
+
+  // Set alerts based on budget status
+  useEffect(() => {
+    const incomeValue = parseFloat(income);
+
+    if (incomeValue > 0) {
+      if (incomeLeft < 0) {
+        notifications.show({
+          color: 'red',
+          title: 'Alert',
+          message: 'Your expenses exceed your income',
+        })
+      } else if (incomeLeft < incomeValue * 0.1) {
+        notifications.show({
+          color: 'yellow',
+          title: 'Warning',
+          message: 'You are close to exceeding your budget',
+        })
+      }
+    }
+  }, [incomeLeft, income]);
+
   // Prepare data for charts (excluding "Income Left")
   const chartData = expenseData.map((item) => {
     const categoryInfo = categories.find((cat) => cat.name === item.category) || { name: item.category, color: "#999999" };
@@ -331,6 +364,16 @@ const ExpenseTracker = () => {
               <Button fullWidth onClick={handleSaveBudget} style={{ backgroundColor: "#ff9800", color: "white" }}>
                 {budgetId ? "Update Budget" : "Save Budget"}
               </Button>
+
+              {incomeToExpenseRatio !== null ? (
+                <>
+                  <Title order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
+                </>
+              ) : (
+                <Text>
+                  {income > 0 ? "Add expenses to see the budget overview." : "Please enter your monthly income."}
+                </Text>
+              )}
 
               {/* Expense List */}
               <Stack spacing="xs" mt="md">
