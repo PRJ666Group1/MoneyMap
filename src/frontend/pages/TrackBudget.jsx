@@ -331,16 +331,6 @@ const ExpenseTracker = () => {
     }
   }, [incomeLeft, income]);
 
-  useEffect(() => {
-    if (showCharts && !expense) {
-      notifications.show({
-        color: "red",
-        title: "Error",
-        message: "Please add an expense to show the charts",
-      });
-    }
-  }, [showCharts, expense]);
-
   // Prepare data for charts (excluding "Income Left")
   const chartData = expenseData.map((item) => {
     const categoryInfo = categories.find((cat) => cat.name === item.category) || { name: item.category, color: "#999999" };
@@ -461,7 +451,11 @@ const ExpenseTracker = () => {
               </Button>
 
               {/* Charts */}
-              {showCharts && (
+              {showCharts && (!expenseData || expenseData.length === 0) &&(
+                <Text style={{ fontWeight: 'bold', color: 'red' }}>Please add an expense to see the charts</Text>
+              )}
+
+              {showCharts && chartData &&(
                 <Tabs defaultValue="pie">
                   <Tabs.List>
                     <Tabs.Tab value="pie">Pie Chart</Tabs.Tab>
