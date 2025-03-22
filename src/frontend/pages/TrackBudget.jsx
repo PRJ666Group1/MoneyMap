@@ -1,331 +1,495 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  LineChart,
-  Line,
-} from "recharts";
+  Container,
+  Card,
+  Title,
+  NumberInput,
+  Group,
+  Button,
+  Modal,
+  Input,
+  Stack,
+  Select,
+  Grid,
+  ThemeIcon,
+  Text,
+  Tabs,
+  Table,
+} from "@mantine/core";
+import { PieChart, BarChart, LineChart } from "@mantine/charts"; // Re-added LineChart
+import { notifications } from "@mantine/notifications";
+import { useDisclosure } from "@mantine/hooks";
+import { IoIosClose } from "react-icons/io";
 
-// Styled components for the redesigned page
-const PageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #f5f5f5; /* Light gray background */
-  padding: 20px;
-  font-family: "Montserrat", sans-serif;
-`;
-
-const Header = styled.div`
-  background: linear-gradient(135deg, #397d2c, #69db7c);
-  color: white;
-  text-align: center;
-  padding: 30px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderTitle = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-`;
-
-const HeaderSubtitle = styled.p`
-  font-size: 1.2rem;
-  font-weight: 400;
-`;
-
-const ContentGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-  margin-top: 20px;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+// Utility function to generate random colors
+const generateRandomColor = () => {
+  const letters = "0123456789ABCDEF";
+  let color = "#";
+  for (let i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
   }
-`;
-
-const Card = styled.div`
-  background-color: white;
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const CardTitle = styled.h2`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #397d2c;
-  margin-bottom: 15px;
-`;
-
-const Input = styled.input`
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 100%;
-`;
-
-const Select = styled.select`
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 100%;
-`;
-
-const Button = styled.button`
-  background-color: #397d2c;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: #2f6b24;
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-`;
-
-const TableHeader = styled.th`
-  background-color: #397d2c;
-  color: white;
-  padding: 10px;
-  text-align: left;
-`;
-
-const TableRow = styled.tr`
-  &:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-`;
-
-const TableCell = styled.td`
-  padding: 10px;
-  border: 1px solid #ddd;
-`;
-
-const ChartWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 20px;
-`;
-
-const ChartSelector = styled.select`
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  width: 100%;
-`;
+  return color;
+};
 
 const ExpenseTracker = () => {
-  const [income, setIncome] = useState(localStorage.getItem("income") || "");
-  const [expense, setExpense] = useState("");
+  // State variables
+  const [tempIncome, setTempIncome] = useState(0);
+  const [income, setIncome] = useState(0);
+  const [expense, setExpense] = useState(0);
   const [category, setCategory] = useState("");
-  const [expenseData, setExpenseData] = useState(
-    JSON.parse(localStorage.getItem("expenseData")) || []
-  );
-  const [showChart, setShowChart] = useState(false); // Toggle chart visibility
-  const [chartType, setChartType] = useState("Pie"); // Chart type selector
-
-  const categories = [
+  const [customCategory, setCustomCategory] = useState("");
+  const [expenseData, setExpenseData] = useState([]);
+  const [categories, setCategories] = useState([
     { name: "Rent", color: "#FF6347" },
     { name: "Food", color: "#1E90FF" },
     { name: "Groceries", color: "#FFD700" },
     { name: "Utilities", color: "#8A2BE2" },
     { name: "Entertainment", color: "#FF4500" },
-    { name: "Others", color: "#FF1493" },
-  ];
+  ]);
+  const [incomeToExpenseRatio, setIncomeToExpenseRatio] = useState(null);
+  const [budgetId, setBudgetId] = useState(null);
+  const [showCharts, setShowCharts] = useState(false); // Toggle charts visibility
+  const [categoryModalOpened, { open: categoryModalOpen, close: categoryModalClose }] = useDisclosure(false);
+  const [expenseModalOpened, { open: expenseModalOpen, close: expenseModalClose }] = useDisclosure(false);
+  const [updateIncomeModalOpened, { open: updateIncomeModalOpen, close: updateIncomeModalClose }] = useDisclosure(false);
 
-  const handleAddExpense = () => {
-    if (!income || !expense || !category) {
-      alert("Please fill all fields");
+  // Fetch budgets from database on component mount
+  useEffect(() => {
+    fetchBudgets();
+  }, []);
+
+  // Function to fetch budgets from database
+  const fetchBudgets = async () => {
+    try {
+      const result = await window.electron.ipcRenderer.invoke("get-budgets");
+      if (result.success && result.budgets && result.budgets.length > 0) {
+        let incomeEntry = null;
+        const expenses = [];
+        let customCats = null;
+
+        result.budgets.forEach((budget) => {
+          if (budget.category === "Income") {
+            incomeEntry = budget;
+            if (budget.categories) {
+              try {
+                customCats =
+                  typeof budget.categories === "string"
+                    ? JSON.parse(budget.categories)
+                    : budget.categories;
+              } catch (e) {
+                console.error("Error parsing categories:", e);
+              }
+            }
+          } else {
+            expenses.push({
+              id: budget.id,
+              category: budget.category,
+              expense: parseFloat(budget.expense),
+            });
+          }
+        });
+
+        if (incomeEntry) {
+          setIncome(parseFloat(incomeEntry.income));
+          setBudgetId(incomeEntry.id);
+        }
+
+        setExpenseData(expenses);
+
+        if (customCats && Array.isArray(customCats) && customCats.length > 0) {
+          setCategories(customCats);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching budgets:", error);
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Failed to load budget data. Please try again",
+      });
+    }
+  };
+
+  // Handle adding expense
+  const handleAddExpense = async () => {
+    if (!expense || !category) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Please fill all fields",
+      });
       return;
     }
 
-    const newExpense = {
-      category,
-      expense: parseFloat(expense),
-      date: new Date().toLocaleDateString(), // Add date to expense
+    if (!income) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Please enter your monthly income first",
+      });
+      return;
+    }
+
+    const incomeValue = parseFloat(income) || 0;
+    const expenseValue = parseFloat(expense);
+
+    if (isNaN(expenseValue)) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Please enter a valid expense amount",
+      });
+      return;
+    }
+
+    const updatedExpenseData = [...expenseData];
+    const existingExpenseIndex = updatedExpenseData.findIndex((e) => e.category === category);
+
+    const budgetData = {
+      income: incomeValue,
+      category: category,
+      expenseAmount: expenseValue,
     };
 
-    const updatedExpenseData = [...expenseData, newExpense];
-    setExpenseData(updatedExpenseData);
-    localStorage.setItem("expenseData", JSON.stringify(updatedExpenseData));
+    try {
+      let result;
 
-    setExpense("");
+      if (existingExpenseIndex >= 0) {
+        const existingId = updatedExpenseData[existingExpenseIndex].id;
+        result = await window.electron.ipcRenderer.invoke("update-budget", {
+          id: existingId,
+          budgetData,
+        });
+
+        if (result.success) {
+          updatedExpenseData[existingExpenseIndex].expense = expenseValue;
+        }
+      } else {
+        result = await window.electron.ipcRenderer.invoke("create-budget", {
+          budgetData,
+        });
+
+        if (result.success && result.budget) {
+          updatedExpenseData.push({
+            id: result.budget.id,
+            category,
+            expense: expenseValue,
+          });
+        }
+      }
+
+      if (result.success) {
+        setExpenseData(updatedExpenseData);
+        setExpense("");
+        setCategory("");
+      } else {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: result.error || "Failed to save expense. Please try again",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving expense:", error);
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Error saving expense. Please try again",
+      });
+    }
   };
 
-  const handleDeleteRecent = () => {
-    if (expenseData.length === 0) {
-      alert("No expenses to delete!");
+  // Add custom category
+  const handleAddCategory = () => {
+    if (customCategory) {
+      const newCategory = { name: customCategory, color: generateRandomColor() };
+      const updatedCategories = [...categories, newCategory];
+      setCategories(updatedCategories);
+      setCustomCategory("");
+      categoryModalClose();
+    }
+  };
+
+  // Delete specific expense
+  const handleDeleteExpense = async (categoryToDelete) => {
+    try {
+      const expenseToDelete = expenseData.find((expense) => expense.category === categoryToDelete);
+
+      if (!expenseToDelete || !expenseToDelete.id) {
+        notifications.show({
+          color: "red",
+          title: "Cannot Delete Expense",
+          message: "Expense not found in database",
+        });
+        return;
+      }
+
+      const response = await window.electron.ipcRenderer.invoke("delete-budget", expenseToDelete.id);
+
+      if (response.success) {
+        const updatedExpenseData = expenseData.filter((expense) => expense.category !== categoryToDelete);
+        setExpenseData(updatedExpenseData);
+      } else {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: response.error || "Failed to delete expense",
+        });
+      }
+    } catch (err) {
+      console.error("Error deleting expense:", err);
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Error deleting expense",
+      });
+    }
+  };
+
+  // Save all budget data to database
+  const handleSaveBudget = async () => {
+    if (parseFloat(income) <= 0) {
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Please enter a valid income amount before saving",
+      });
       return;
     }
 
-    const updatedExpenseData = expenseData.slice(0, -1); // Remove the last item
-    setExpenseData(updatedExpenseData);
-    localStorage.setItem("expenseData", JSON.stringify(updatedExpenseData));
-  };
+    try {
+      const budgetData = {
+        income: parseFloat(income),
+        expenses: expenseData,
+        categories: categories,
+      };
 
-  const data = [
-    { name: "Income", value: income - expenseData.reduce((acc, curr) => acc + curr.expense, 0), color: "#32CD32" },
-    ...categories.map((category) => ({
-      name: category.name,
-      value: expenseData
-        .filter((e) => e.category === category.name)
-        .reduce((acc, curr) => acc + curr.expense, 0),
-      color: category.color,
-    })),
-  ];
+      const response = await window.electron.ipcRenderer.invoke("save-budget", budgetData);
 
-  const renderChart = () => {
-    if (chartType === "Pie") {
-      return (
-        <PieChart width={400} height={400}>
-          <Pie
-            data={data}
-            cx="50%"
-            cy="50%"
-            outerRadius={120}
-            fill="#8884d8"
-            dataKey="value"
-            label
-          >
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color} />
-            ))}
-          </Pie>
-          <Tooltip />
-          <Legend />
-        </PieChart>
-      );
-    } else if (chartType === "Bar") {
-      return (
-        <BarChart width={500} height={300} data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="value" fill="#8884d8" />
-        </BarChart>
-      );
-    } else if (chartType === "Line") {
-      return (
-        <LineChart width={500} height={300} data={data}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Line type="monotone" dataKey="value" stroke="#8884d8" />
-        </LineChart>
-      );
+      if (response.success) {
+        if (response.id) {
+          setBudgetId(response.id);
+        }
+
+        notifications.show({
+          color: "green",
+          message: "Budget Saved Successfully!",
+        });
+
+        fetchBudgets();
+      } else {
+        notifications.show({
+          color: "red",
+          title: "Error",
+          message: response.error || "Error saving budget. Please try again",
+        });
+      }
+    } catch (error) {
+      console.error("Error saving budget:", error);
+      notifications.show({
+        color: "red",
+        title: "Error",
+        message: "Error saving budget. Please try again",
+      });
     }
   };
 
+  // Calculate totals
+  const totalExpense = expenseData.reduce((acc, curr) => acc + curr.expense, 0);
+  const incomeLeft = parseFloat(income) - totalExpense;
+
+  // Prepare data for charts (excluding "Income Left")
+  const chartData = expenseData.map((item) => {
+    const categoryInfo = categories.find((cat) => cat.name === item.category) || { name: item.category, color: "#999999" };
+    return {
+      name: item.category,
+      value: item.expense,
+      color: categoryInfo.color,
+    };
+  });
+
   return (
-    <PageContainer>
-      <Header>
-        <HeaderTitle>Track Your Budget</HeaderTitle>
-        <HeaderSubtitle>Manage your income and expenses effectively</HeaderSubtitle>
-      </Header>
+    <Container fluid style={{ backgroundColor: "white", padding: "20px" }}>
+      <Grid>
+        {/* Left Section: Controls */}
+        <Grid.Col span={4}>
+          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#f8f9fa" }}>
+            <Stack>
+              <Title order={3} style={{ color: "#333" }}>Budget Controls</Title>
 
-      <ContentGrid>
-        {/* Left Section */}
-        <Card>
-          <CardTitle>Update Budget</CardTitle>
-          <Input
-            type="number"
-            placeholder="Monthly Income"
-            value={income}
-            onChange={(e) => setIncome(e.target.value)}
-          />
-          <Input
-            type="number"
-            placeholder="Expense Amount"
-            value={expense}
-            onChange={(e) => setExpense(e.target.value)}
-          />
-          <Select value={category} onChange={(e) => setCategory(e.target.value)}>
-            <option value="">Select Category</option>
-            {categories.map((cat, index) => (
-              <option key={index} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </Select>
-          <Button onClick={handleAddExpense}>Add Expense</Button>
-        </Card>
+              {/* Update Income */}
+              <Button onClick={updateIncomeModalOpen} style={{ backgroundColor: "#4caf50", color: "white" }}>
+                Update Income
+              </Button>
 
-        {/* Right Section */}
-        <Card>
-          <CardTitle>Budget Overview</CardTitle>
-          <Table>
-            <thead>
-              <tr>
-                <TableHeader>Category</TableHeader>
-                <TableHeader>Amount</TableHeader>
-                <TableHeader>Date</TableHeader>
-              </tr>
-            </thead>
-            <tbody>
-              {expenseData.map((expense, index) => (
-                <TableRow key={index}>
-                  <TableCell>{expense.category}</TableCell>
-                  <TableCell>${expense.expense.toFixed(2)}</TableCell>
-                  <TableCell>{expense.date}</TableCell>
-                </TableRow>
-              ))}
-            </tbody>
-          </Table>
-          <div>
-            <Button onClick={() => setShowChart(!showChart)}>
-              {showChart ? "Hide Chart" : "Show Chart"}
-            </Button>
-            <Button onClick={handleDeleteRecent} style={{ marginLeft: "10px", backgroundColor: "#ff4d4d" }}>
-              Delete Recent
-            </Button>
-          </div>
-          {showChart && (
-            <>
-              <ChartSelector
-                value={chartType}
-                onChange={(e) => setChartType(e.target.value)}
-              >
-                <option value="Pie">Pie Chart</option>
-                <option value="Bar">Bar Chart</option>
-                <option value="Line">Line Chart</option>
-              </ChartSelector>
-              <ChartWrapper>{renderChart()}</ChartWrapper>
-            </>
-          )}
-        </Card>
-      </ContentGrid>
-    </PageContainer>
+              {/* Add Expense */}
+              <Button onClick={expenseModalOpen} style={{ backgroundColor: "#2196f3", color: "white" }}>
+                Add Expense
+              </Button>
+
+              {/* Save Budget */}
+              <Button fullWidth onClick={handleSaveBudget} style={{ backgroundColor: "#ff9800", color: "white" }}>
+                {budgetId ? "Update Budget" : "Save Budget"}
+              </Button>
+
+              {/* Expense List */}
+              <Stack spacing="xs" mt="md">
+                {chartData.map((entry, index) => (
+                  <Card key={index} padding="xs" shadow="sm" radius="md" style={{ backgroundColor: "#fff" }}>
+                    <Grid align="center">
+                      <Grid.Col span={6}>
+                        <Group>
+                          <ThemeIcon color={entry.color} radius="xl" />
+                          <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
+                        </Group>
+                      </Grid.Col>
+                      <Grid.Col span={3}>
+                        <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
+                      </Grid.Col>
+                      <Grid.Col span={3} style={{ display: "flex", justifyContent: "flex-end" }}>
+                        <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
+                          <IoIosClose size={20} />
+                        </Button>
+                      </Grid.Col>
+                    </Grid>
+                  </Card>
+                ))}
+              </Stack>
+            </Stack>
+          </Card>
+        </Grid.Col>
+
+        {/* Right Section: Table and Charts */}
+        <Grid.Col span={8}>
+          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#f8f9fa" }}>
+            <Stack>
+              <Title order={3} style={{ color: "#333" }}>Budget Overview</Title>
+
+              {/* Income Left as Text */}
+              <Text size="lg" fw={500} style={{ color: incomeLeft >= 0 ? "green" : "red" }}>
+                Income Left: ${incomeLeft.toFixed(2)}
+              </Text>
+
+              {/* Table */}
+              <Table striped highlightOnHover>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: "left" }}>Category</th>
+                    <th style={{ textAlign: "left" }}>Amount</th>
+                    <th style={{ textAlign: "right" }}>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chartData.map((entry, index) => (
+                    <tr key={index}>
+                      <td style={{ textAlign: "left" }}>
+                        <Group>
+                          <ThemeIcon color={entry.color} radius="xl" />
+                          <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
+                        </Group>
+                      </td>
+                      <td style={{ textAlign: "left" }}>
+                        <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
+                          <IoIosClose size={20} />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+
+              {/* Toggle Charts Button */}
+              <Button onClick={() => setShowCharts(!showCharts)} style={{ backgroundColor: "#9c27b0", color: "white" }}>
+                {showCharts ? "Hide Charts" : "Show Charts"}
+              </Button>
+
+              {/* Charts */}
+              {showCharts && (
+                <Tabs defaultValue="pie">
+                  <Tabs.List>
+                    <Tabs.Tab value="pie">Pie Chart</Tabs.Tab>
+                    <Tabs.Tab value="bar">Bar Chart</Tabs.Tab>
+                    <Tabs.Tab value="line">Line Chart</Tabs.Tab> {/* Re-added Line Chart */}
+                  </Tabs.List>
+
+                  <Tabs.Panel value="pie">
+                    <PieChart
+                      size={400}
+                      pieProps={{ opacity: 0.7 }}
+                      withLabelsLine
+                      labelsPosition="outside"
+                      labelsType="percent"
+                      withLabels
+                      data={chartData}
+                      withTooltip
+                    />
+                  </Tabs.Panel>
+
+                  <Tabs.Panel value="bar">
+                    <BarChart
+                      h={400}
+                      data={chartData}
+                      dataKey="name"
+                      series={[{ name: "value", color: "black" }]}
+                      withYAxis
+                      withXAxis
+                      valueFormatter={(value) => "$" + new Intl.NumberFormat("en-US").format(value)}
+                      withBarValueLabel
+                      valueLabelProps={{ position: "inside", fill: "white" }}
+                      tooltipAnimationDuration={200}
+                      barLabelColor="dark.9"
+                    />
+                  </Tabs.Panel>
+
+                  <Tabs.Panel value="line">
+                    <LineChart
+                      h={400}
+                      data={chartData}
+                      dataKey="name"
+                      series={[{ name: "value", color: "blue" }]}
+                      withYAxis
+                      withXAxis
+                      curveType="linear"
+                      withTooltip
+                      tooltipAnimationDuration={200}
+                      strokeWidth={2}
+                    />
+                  </Tabs.Panel>
+                </Tabs>
+              )}
+            </Stack>
+          </Card>
+        </Grid.Col>
+      </Grid>
+
+      {/* Modals */}
+      <Modal centered opened={updateIncomeModalOpened} onClose={updateIncomeModalClose} title="Update Income">
+        <Stack>
+          <Text>Current income: <Text span inherit c="green">${income}</Text></Text>
+          <NumberInput placeholder="Monthly Income" allowNegative={false} value={tempIncome} onChange={setTempIncome} prefix="$" />
+          <Button fullWidth mt="md" onClick={() => { setIncome(tempIncome); updateIncomeModalClose(); }}>Done</Button>
+        </Stack>
+      </Modal>
+
+      <Modal centered opened={expenseModalOpened} onClose={expenseModalClose} title="Add Expense">
+        <Stack>
+          <NumberInput placeholder="Expense Amount" value={expense} onChange={setExpense} prefix="$" />
+          <Select placeholder="Select Category" value={category} onChange={setCategory} data={categories.map((item) => item.name)} />
+          <Group justify="space-between">
+            <Button onClick={categoryModalOpen}>Add Custom Category</Button>
+            <Button onClick={handleAddExpense}>Add Expense</Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      <Modal centered opened={categoryModalOpened} onClose={categoryModalClose} title="Add Custom Category">
+        <Input placeholder="Name of Custom Category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
+        <Button fullWidth mt="md" onClick={handleAddCategory}>Add</Button>
+      </Modal>
+    </Container>
   );
 };
 
