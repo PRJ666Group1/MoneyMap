@@ -12,7 +12,7 @@ const AppContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #397d2c, #69db7c);
+  background: #397d2c;
   padding: 30px;
   font-family: 'Montserrat', sans-serif;
 `;
