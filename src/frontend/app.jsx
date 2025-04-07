@@ -15,6 +15,7 @@ import LeftSidebar from "./components/LeftSideBar.jsx"; // Import the LeftSideba
 import HomePage from "./pages/HomePage.jsx";
 import FinancialGoal from "./pages/FinancialGoal.jsx";
 import FinancialGoalsDashboard from "./pages/FinancialGoalsDashboard.jsx";
+import FinancialGoalsPage from "./pages/FinancialGoalsPage.jsx";
 import LogTransactions from "./pages/LogTransactions.jsx";
 import TrackBudget from "./pages/TrackBudget.jsx"; // Import TrackBudget
 import Settings from "./pages/Settings.jsx"; // Import Settings
@@ -39,11 +40,8 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/log-transactions" element={<LogTransactions />} />
               <Route path="/financial-goal" element={<FinancialGoal />} />
-              <Route
-                path="/financial-goals-dashboard"
-                element={<FinancialGoalsDashboard />
-                }
-              />
+              <Route path="/financial-goals-dashboard" element={<FinancialGoalsDashboard />} />
+              <Route path="/financial-goals-page" element={<FinancialGoalsPage />} />
               <Route path="/track-budget" element={<TrackBudget />} /> {/* Add the new route here */}
               <Route path="/settings" element={<Settings />} />
             </Routes>
