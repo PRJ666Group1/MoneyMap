@@ -1,11 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Card, Flex, Title, Image, Text, Grid, Progress, List, ThemeIcon, Divider } from '@mantine/core';
-import { IconCheck, IconTrendingDown, IconTrendingUp } from '@tabler/icons-react';
-import styled from 'styled-components';
+import React, { useState, useEffect } from "react";
+import {
+  Container,
+  Card,
+  Flex,
+  Title,
+  Image,
+  Text,
+  Grid,
+  Progress,
+  List,
+  ThemeIcon,
+  Divider,
+} from "@mantine/core";
+import { IconCheck, IconTrendingDown } from "@tabler/icons-react";
+import styled from "styled-components";
 
-import home1 from '/public/images/mm_home1.jpg';
-import home2 from '/public/images/mm_home2.jpg';
-import home3 from '/public/images/mm_home3.jpg';
+import home1 from "/public/images/mm_home1.jpg";
+import home2 from "/public/images/mm_home2.jpg";
+import home3 from "/public/images/mm_home3.jpg";
 
 // Styled components
 const AppContainer = styled.div`
@@ -14,7 +26,7 @@ const AppContainer = styled.div`
   min-height: 100vh;
   background: #397d2c;
   padding: 30px;
-  font-family: 'Montserrat', sans-serif;
+  font-family: "Montserrat", sans-serif;
 `;
 
 const HeroSection = styled.div`
@@ -100,84 +112,52 @@ const ProgressBar = styled(Progress)`
 `;
 
 const HomePage = () => {
-  // Dummy data for now
+  const { ipcRenderer } = window.electron;
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    // Simulate API request (replace with real fetch later)
-    setTimeout(() => {
-      setData({
-        financial_summary: {
-          total_income: 5000,
-          total_expenses: 3500,
-          net_balance: 1500,
-          spending_comparison: {
-            "Groceries": { budgeted: 500, actual: 600, over_budget: true },
-            "Entertainment": { budgeted: 200, actual: 150, over_budget: false },
-            "Rent": { budgeted: 1200, actual: 1200, over_budget: false }
-          }
-        },
-        recurring_expense_analysis: {
-          recurring_expenses: {
-            "Subscription": 15,
-            "Gym Membership": 50
+    let isMounted = true;
+
+    (async () => {
+      try {
+        const message = await ipcRenderer.invoke("export-json");
+        
+        const res = await fetch("http://localhost:4000/api/data", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer supersecret123",
           },
-          total_recurring_monthly: 65
-        },
-        financial_goals_analysis: {
-          goals_progress: {
-            "Emergency Fund": { targetAmount: 5000, timeLeft: 6, progress: 40 },
-            "Vacation": { targetAmount: 2000, timeLeft: 3, progress: 60 }
-          }
-        },
-        financial_recommendations: [
-          "Consider reducing your grocery expenses.",
-          "Your rent is stable, good job maintaining it!",
-          "Save more towards your emergency fund."
-        ]
-      });
-    }, 1000);
+          body: JSON.stringify({ message: JSON.stringify(message.data) }),
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch");
+
+        const json = await res.json();
+        if (isMounted) setData(json);
+      } catch (error) {
+        console.error("Fetch failed:", error);
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
 
   if (!data) return <Text>Loading financial data...</Text>;
 
   return (
     <AppContainer>
-      {/* Hero Section */}
       <HeroSection>
         <HeroTitle>MoneyMap</HeroTitle>
-        <HeroSubtitle>Track, manage, and grow your finances effortlessly.</HeroSubtitle>
+        <HeroSubtitle>
+          Track, manage, and grow your finances effortlessly.
+        </HeroSubtitle>
       </HeroSection>
 
-      {/* Features Section */}
-      <Grid gutter="lg">
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <FeatureCard>
-            <FeatureImage src={home1} alt="Feature 1" />
-            <FeatureTitle>Smart Budgeting</FeatureTitle>
-            <FeatureDescription>Plan your expenses and save efficiently.</FeatureDescription>
-          </FeatureCard>
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <FeatureCard>
-            <FeatureImage src={home2} alt="Feature 2" />
-            <FeatureTitle>Expense Tracking</FeatureTitle>
-            <FeatureDescription>Monitor spending in real-time.</FeatureDescription>
-          </FeatureCard>
-        </Grid.Col>
-
-        <Grid.Col span={{ base: 12, md: 4 }}>
-          <FeatureCard>
-            <FeatureImage src={home3} alt="Feature 3" />
-            <FeatureTitle>Financial Insights</FeatureTitle>
-            <FeatureDescription>Get detailed reports and analytics.</FeatureDescription>
-          </FeatureCard>
-        </Grid.Col>
-      </Grid>
-
-      {/* Financial Summary Section */}
-      <SectionCard style={{marginTop: "3rem"}}>
+      <SectionCard style={{ marginTop: "3rem" }}>
         <SectionTitle>Financial Summary</SectionTitle>
         <Text>Total Income: ${data.financial_summary.total_income}</Text>
         <Text>Total Expenses: ${data.financial_summary.total_expenses}</Text>
@@ -186,38 +166,51 @@ const HomePage = () => {
         <Divider my="sm" />
 
         <SectionTitle>Spending Comparison</SectionTitle>
-        {Object.entries(data.financial_summary.spending_comparison).map(([category, details]) => (
-          <Flex key={category} justify="space-between" align="center" mb="sm">
-            <Text>{category}</Text>
-            <Text color={details.over_budget ? 'red' : 'green'}>
-              ${details.actual} / ${details.budgeted}
+        {data.financial_summary.spending_comparison.map((item) => (
+          <Flex
+            key={item.category_name}
+            justify="space-between"
+            align="center"
+            mb="sm"
+          >
+            <Text>{item.category_name}</Text>
+            <Text color={item.over_budget ? "red" : "green"}>
+              ${item.actual} / ${item.budgeted}
             </Text>
           </Flex>
         ))}
       </SectionCard>
 
-      {/* Recurring Expense Analysis Section */}
       <SectionCard>
         <SectionTitle>Recurring Expenses</SectionTitle>
-        <Text>Total Monthly Recurring: ${data.recurring_expense_analysis.total_recurring_monthly}</Text>
-        {Object.entries(data.recurring_expense_analysis.recurring_expenses).map(([expense, cost]) => (
-          <Text key={expense}>• {expense}: ${cost}</Text>
+        <Text>
+          Total Monthly Recurring: $
+          {data.recurring_expense_analysis.total_recurring_monthly}
+        </Text>
+        {data.recurring_expense_analysis.recurring_expenses.map((item) => (
+          <Text key={item.name}>
+            • {item.name}: ${item.expense}
+          </Text>
         ))}
       </SectionCard>
 
-      {/* Financial Goals Section */}
       <SectionCard>
         <SectionTitle>Financial Goals</SectionTitle>
-        {Object.entries(data.financial_goals_analysis.goals_progress).map(([goal, details]) => (
-          <Card key={goal} shadow="sm" radius="md" p="sm" mt="sm">
-            <Text>{goal}</Text>
-            <Text size="sm">Target: ${details.targetAmount} | Time Left: {details.timeLeft} months</Text>
-            <ProgressBar value={details.progress} size="lg" color={details.progress < 50 ? 'red' : 'green'} />
+        {data.financial_goals_analysis.goals_progress.map((goal) => (
+          <Card key={goal.name} shadow="sm" radius="md" p="sm" mt="sm">
+            <Text>{goal.name}</Text>
+            <Text size="sm">
+              Target: ${goal.targetAmount} | Time Left: {goal.timeLeft} months
+            </Text>
+            <ProgressBar
+              value={goal.progress}
+              size="lg"
+              color={goal.progress < 50 ? "red" : "green"}
+            />
           </Card>
         ))}
       </SectionCard>
 
-      {/* Financial Recommendations Section */}
       <SectionCard>
         <SectionTitle>Financial Recommendations</SectionTitle>
         <BulletList>
@@ -230,9 +223,15 @@ const HomePage = () => {
             </RecommendationItem>
           ))}
         </BulletList>
-        {/* Hardcoded Icon for Bad Advice (Trending Down) */}
         <hr />
-        <BulletList spacing="xs" icon={<ThemeIcon color="red.8" size={24} radius="xl"><IconTrendingDown size="1rem" /></ThemeIcon>}>
+        <BulletList
+          spacing="xs"
+          icon={
+            <ThemeIcon color="red.8" size={24} radius="xl">
+              <IconTrendingDown size="1rem" />
+            </ThemeIcon>
+          }
+        >
           <List.Item>
             You should review your spending habits on unnecessary subscriptions.
           </List.Item>
