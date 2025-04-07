@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from "electron";
+import { app, BrowserWindow, ipcMain, session } from "electron";
 import started from "electron-squirrel-startup";
 
 const fs = require("fs");
@@ -22,6 +22,7 @@ const createWindow = () => {
     width: 800,
     height: 600,
     webPreferences: {
+      webSecurity: false,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });
@@ -48,6 +49,17 @@ app.whenReady().then(async () => {
   } catch (error) {
     console.error("Error during database initialization:", error);
   }
+
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          "Content-Security-Policy": [
+            "default-src 'self'; connect-src 'self' http://localhost:4000; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
+          ],
+        },
+      });
+    });
 
   // Convert DB to json and save to clipboard
   ipcMain.handle("export-json", async (event) => {

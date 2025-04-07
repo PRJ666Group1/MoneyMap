@@ -45,10 +45,10 @@ export default async function exportData() {
         const jsonData = { goals, budget, transactions };
         const jsonString = JSON.stringify(jsonData, null, 4);
         
-        clipboard.writeText(jsonString);
-        console.log("Data successfully copied to clipboard!");
+        // clipboard.writeText(jsonString);
+        // console.log("Data successfully copied to clipboard!");
 
-        return { success: true };
+        return { success: true, data: jsonData};
     } catch (error) {
         console.error("Error exporting data to JSON:", error);
         return { success: false, error: error.message };
