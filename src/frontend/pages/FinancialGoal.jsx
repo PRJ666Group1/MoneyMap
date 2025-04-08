@@ -98,114 +98,107 @@ function FinancialGoal({ onGoalAdded }) {
   };
 
   return (
-    <PageContainer>
-      <Header>
-        <HeaderTitle>Financial Goal Planner</HeaderTitle>
-        <HeaderSubtitle>Set and track your financial goals with ease</HeaderSubtitle>
-      </Header>
+    // <PageContainer>
+      <StyledCard>
+        <Title order={2} align="center" mb="lg" color="#397d2c">
+          Create New Financial Goal
+        </Title>
 
-      <StyledContainer>
-        <StyledCard>
-          <Title order={2} align="center" mb="lg">
-            Create New Financial Goal
-          </Title>
-
-          <Grid gutter="xl">
-            {/* First Column */}
-            <Grid.Col span={4}>
-              <Stack spacing="md">
-                {errors.goalName && <ErrorText>{errors.goalName}</ErrorText>}
+        <Grid gutter="xl">
+          {/* First Column */}
+          <Grid.Col span={4}>
+            <Stack spacing="md">
+              {errors.goalName && <ErrorText>{errors.goalName}</ErrorText>}
+              <Input
+                type="text"
+                placeholder="Goal Name"
+                value={goalName}
+                onChange={(e) => setGoalName(e.target.value)}
+              />
+              {errors.targetAmount && <ErrorText>{errors.targetAmount}</ErrorText>}
+              <NumberInput
+                type="text"
+                placeholder="Target Amount"
+                value={targetAmount}
+                onChange={setTargetAmount}
+              />
+              {errors.category && <ErrorText>{errors.category}</ErrorText>}
+              <Select
+                value={category}
+                onChange={setCategory}
+                placeholder="Select Category"
+                data={[
+                  { value: "savings", label: "Savings" },
+                  { value: "investment", label: "Investment" },
+                  { value: "emergency", label: "Emergency Fund" },
+                  { value: "custom", label: "Custom" },
+                ]}
+              />
+              {category === "custom" && (
                 <Input
                   type="text"
-                  placeholder="Goal Name"
-                  value={goalName}
-                  onChange={(e) => setGoalName(e.target.value)}
+                  placeholder="Enter Custom Category"
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
                 />
-                {errors.targetAmount && <ErrorText>{errors.targetAmount}</ErrorText>}
-                <NumberInput
-                  type="text" // fix for the error that appear when selecting with arrow button
-                  placeholder="Target Amount"
-                  value={targetAmount}
-                  onChange={setTargetAmount}
-                />
-                {errors.category && <ErrorText>{errors.category}</ErrorText>}
-                <Select
-                  value={category}
-                  onChange={setCategory}
-                  placeholder="Select Category"
-                  data={[
-                    { value: "savings", label: "Savings" },
-                    { value: "investment", label: "Investment" },
-                    { value: "emergency", label: "Emergency Fund" },
-                    { value: "custom", label: "Custom" },
-                  ]}
-                />
-                {category === "custom" && (
-                  <Input
-                    type="text"
-                    placeholder="Enter Custom Category"
-                    value={customCategory}
-                    onChange={(e) => setCustomCategory(e.target.value)}
-                  />
-                )}
-                {errors.customCategory && <ErrorText>{errors.customCategory}</ErrorText>}
-              </Stack>
-            </Grid.Col>
+              )}
+              {errors.customCategory && <ErrorText>{errors.customCategory}</ErrorText>}
+            </Stack>
+          </Grid.Col>
 
-            {/* Second Column */}
-            <Grid.Col span={4}>
-              <Stack spacing="md">
-                <Checkbox
-                  checked={recurring}
-                  onChange={(e) => setRecurring(e.target.checked)}
-                  label="Enable Automatic Recurring Contributions"
-                />
-                {recurring && errors.incomeAmount && <ErrorText>{errors.incomeAmount}</ErrorText>}
-                <Input
-                  type="number"
-                  placeholder="Amount of Income"
-                  value={incomeAmount}
-                  onChange={(e) => setIncomeAmount(e.target.value)}
-                  disabled={!recurring}
-                />
-                {recurring && errors.frequency && <ErrorText>{errors.frequency}</ErrorText>}
-                <Select
-                  value={frequency}
-                  onChange={setFrequency}
-                  placeholder="Select Frequency"
-                  disabled={!recurring}
-                  data={[
-                    { value: "daily", label: "Daily" },
-                    { value: "weekly", label: "Weekly" },
-                    { value: "monthly", label: "Monthly" },
-                    { value: "quarterly", label: "Quarterly" },
-                  ]}
-                />
-              </Stack>
-            </Grid.Col>
+          {/* Second Column */}
+          <Grid.Col span={4}>
+            <Stack spacing="md">
+              <Checkbox
+                checked={recurring}
+                onChange={(e) => setRecurring(e.target.checked)}
+                label="Enable Automatic Recurring Contributions"
+              />
+              {recurring && errors.incomeAmount && <ErrorText>{errors.incomeAmount}</ErrorText>}
+              <Input
+                type="number"
+                placeholder="Amount of Income"
+                value={incomeAmount}
+                onChange={(e) => setIncomeAmount(e.target.value)}
+                disabled={!recurring}
+              />
+              {recurring && errors.frequency && <ErrorText>{errors.frequency}</ErrorText>}
+              <Select
+                value={frequency}
+                onChange={setFrequency}
+                placeholder="Select Frequency"
+                disabled={!recurring}
+                data={[
+                  { value: "daily", label: "Daily" },
+                  { value: "weekly", label: "Weekly" },
+                  { value: "monthly", label: "Monthly" },
+                  { value: "quarterly", label: "Quarterly" },
+                ]}
+              />
+            </Stack>
+          </Grid.Col>
 
-            {/* Third Column */}
-            <Grid.Col span={4}>
-              <Stack spacing="md">
-                {errors.targetDate && <ErrorText>{errors.targetDate}</ErrorText>}
-                <Text size="sm" align="center">
-                  Target Date
-                </Text>
-                <Input
-                  id="target-date"
-                  type="date"
-                  value={targetDate}
-                  onChange={(e) => setTargetDate(e.target.value)}
-                />
-              </Stack>
-            </Grid.Col>
-          </Grid>
+          {/* Third Column */}
+          <Grid.Col span={4}>
+            <Stack spacing="md">
+              {errors.targetDate && <ErrorText>{errors.targetDate}</ErrorText>}
+              <Text size="sm" align="center">
+                Target Date
+              </Text>
+              <Input
+                id="target-date"
+                type="date"
+                value={targetDate}
+                onChange={(e) => setTargetDate(e.target.value)}
+              />
+            </Stack>
+          </Grid.Col>
+        </Grid>
 
-          {/* Button Section */}
-          <SaveButton onClick={saveGoal}>Save New Goal</SaveButton>
-        </StyledCard>
-      </StyledContainer>
-    </PageContainer>
+        {/* Button Section */}
+        <SaveButton onClick={saveGoal}>Save New Goal</SaveButton>
+      </StyledCard>
+    //</PageContainer>
   );
 }
 
@@ -214,41 +207,18 @@ export default FinancialGoal;
 // Styled Components
 const PageContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
   min-height: 100vh;
-  //background: linear-gradient(135deg, #2b5f20, #54c166);
+  background: linear-gradient(135deg, #f0f4f7, #d9e8dc);
   padding: 40px;
-`;
-
-const Header = styled.div`
-  text-align: center;
-  margin-bottom: 40px;
-  background: linear-gradient(135deg, #397d2c, #69db7c);
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-`;
-
-const HeaderTitle = styled.h1`
-  font-size: 3rem;
-  font-weight: 700;
-  color: #ffffff;
-`;
-
-const HeaderSubtitle = styled.p`
-  font-size: 1.2rem;
-  color: #fbf7f7;
-`;
-
-const StyledContainer = styled(Container)`
-  max-width: 1400px;
 `;
 
 const StyledCard = styled(Card)`
+  width: 800px;
+  height: 400px;
   padding: 40px;
-  border-radius: 15px;
+  border-radius: 20px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   background-color: white;
 `;

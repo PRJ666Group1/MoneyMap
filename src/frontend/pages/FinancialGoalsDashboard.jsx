@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Container, Card, Text } from "@mantine/core";
+import { Container, Card, Text, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
-const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded }) => {
+const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded, onAddNewClick }) => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Fetch goals from the backend (IPC), as a separate function outside of useEffect so it can be reused
-   const fetchGoals = async () => {
+  const fetchGoals = async () => {
     try {
       const response = await window.electron.ipcRenderer.invoke("get-goals");
       console.log("Response from IPC:", response); // Debugging
@@ -25,15 +25,13 @@ const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded }) => {
     }
   };
 
-
   // Fetch goals on initial render
   useEffect(() => {
     fetchGoals();
   }, []);
 
-   // Re-fetch goals when `goalAdded` changes
-   useEffect(() => {
-    //console.log("goalAdded changed: ", goalAdded);  // Debugging
+  // Re-fetch goals when `goalAdded` changes
+  useEffect(() => {
     if (goalAdded) {
       fetchGoals(); // Trigger goal fetch when goalAdded changes
     }
@@ -74,59 +72,56 @@ const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded }) => {
 
   return (
     <PageContainer>
-     
+      <DashboardCard>
+        <DashboardHeader>
+          <DashboardTitle>Financial Goals</DashboardTitle>
+          <AddButton onClick={onAddNewClick}>+ Add New</AddButton>
+        </DashboardHeader>
 
-      {/* Main Content */}
-      <ContentContainer>
-        <StyledCard>
-        {goals.length > 0 && (
-          <Title>Financial Goals Dashboard</Title>
+        {/* Main Content */}
+        {goals.length === 0 ? (
+          <NoGoalsMessage>No financial goals found.</NoGoalsMessage>
+        ) : (
+          <GoalsTable>
+            <thead>
+              <tr>
+                <TableHeader>Name</TableHeader>
+                <TableHeader>Target Amount</TableHeader>
+                <TableHeader>Category</TableHeader>
+                <TableHeader>Recurring</TableHeader>
+                <TableHeader>Income Amount</TableHeader>
+                <TableHeader>Frequency</TableHeader>
+                <TableHeader>Target Date</TableHeader>
+                <TableHeader>Actions</TableHeader>
+              </tr>
+            </thead>
+            <tbody>
+              {goals.map((goal) => (
+                <TableRow key={goal.dataValues.id}>
+                  <TableData>{goal.dataValues.name}</TableData>
+                  <TableData>${goal.dataValues.targetAmount}</TableData>
+                  <TableData>{goal.dataValues.category}</TableData>
+                  <TableData>{goal.dataValues.recurring ? "Yes" : "No"}</TableData>
+                  <TableData>
+                    {goal.dataValues.incomeAmount
+                      ? `$${goal.dataValues.incomeAmount}`
+                      : "N/A"}
+                  </TableData>
+                  <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
+                  <TableData>
+                    {new Date(goal.dataValues.targetDate).toLocaleDateString()}
+                  </TableData>
+                  <TableData>
+                    <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>
+                      Delete
+                    </DeleteButton>
+                  </TableData>
+                </TableRow>
+              ))}
+            </tbody>
+          </GoalsTable>
         )}
-
-          {goals.length === 0 ? (
-            <NoGoalsMessage>No financial goals found.</NoGoalsMessage>
-          ) : (
-            <GoalsTable>
-              <thead>
-                <tr>
-                  <TableHeader>Name</TableHeader>
-                  <TableHeader>Target Amount</TableHeader>
-                  <TableHeader>Category</TableHeader>
-                  <TableHeader>Recurring</TableHeader>
-                  <TableHeader>Income Amount</TableHeader>
-                  <TableHeader>Frequency</TableHeader>
-                  <TableHeader>Target Date</TableHeader>
-                  <TableHeader>Actions</TableHeader>
-                </tr>
-              </thead>
-              <tbody>
-                {goals.map((goal) => (
-                  <TableRow key={goal.dataValues.id}>
-                    <TableData>{goal.dataValues.name}</TableData>
-                    <TableData>${goal.dataValues.targetAmount}</TableData>
-                    <TableData>{goal.dataValues.category}</TableData>
-                    <TableData>{goal.dataValues.recurring ? "Yes" : "No"}</TableData>
-                    <TableData>
-                      {goal.dataValues.incomeAmount
-                        ? `$${goal.dataValues.incomeAmount}`
-                        : "N/A"}
-                    </TableData>
-                    <TableData>{goal.dataValues.frequency || "N/A"}</TableData>
-                    <TableData>
-                      {new Date(goal.dataValues.targetDate).toLocaleDateString()}
-                    </TableData>
-                    <TableData>
-                      <DeleteButton onClick={() => handleDelete(goal.dataValues.id)}>
-                        Delete
-                      </DeleteButton>
-                    </TableData>
-                  </TableRow>
-                ))}
-              </tbody>
-            </GoalsTable>
-          )}
-        </StyledCard>
-      </ContentContainer>
+      </DashboardCard>
     </PageContainer>
   );
 };
@@ -136,56 +131,43 @@ export default FinancialGoalsDashboard;
 // Styled Components
 const PageContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   min-height: 100vh;
-  //background: linear-gradient(135deg, #2b5f20, #54c166);
+  background: linear-gradient(135deg, #2b5f20, #54c166);
   padding: 20px;
-  font-family: "Montserrat", sans-serif;
 `;
 
-const Header = styled.div`
-  background: linear-gradient(135deg, #397d2c, #69db7c);
-  color: white;
-  text-align: center;
-  padding: 30px;
-  border-radius: 15px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderTitle = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 700;
-`;
-
-const HeaderSubtitle = styled.p`
-  font-size: 1.2rem;
-  font-weight: 400;
-`;
-
-const ContentContainer = styled(Container)`
+const DashboardCard = styled(Card)`
+  width: 90%; /* Wider dashboard */
   max-width: 1200px;
-  margin: 0 auto;
-`;
-
-const StyledCard = styled(Card)`
-  background-color: white;
-  border-radius: 15px;
   padding: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 15px;
+  background-color: #ffffff; /* White background for contrast */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 `;
 
-const Title = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #333;
+const DashboardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 `;
 
-const NoGoalsMessage = styled(Text)`
-  font-size: 1.2rem;
-  color: #555;
-  text-align: center;
+const DashboardTitle = styled.h1`
+  font-size: 2rem;
+  font-weight: bold;
+  color: #2b5f20; /* Dark green for the title */
+`;
+
+const AddButton = styled(Button)`
+  background-color: #397d2c; /* Green button */
+  color: white;
+  font-weight: bold;
+
+  &:hover {
+    background-color: #2b5f20; /* Darker green on hover */
+  }
 `;
 
 const GoalsTable = styled.table`
@@ -195,7 +177,7 @@ const GoalsTable = styled.table`
 `;
 
 const TableHeader = styled.th`
-  background-color: #397d2c;
+  background-color: #397d2c; /* Green header */
   color: white;
   padding: 10px;
   text-align: left;
@@ -203,7 +185,7 @@ const TableHeader = styled.th`
 
 const TableRow = styled.tr`
   &:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #f9f9f9;
   }
   &:hover {
     background-color: #e6ffe6;
@@ -226,6 +208,12 @@ const DeleteButton = styled.button`
   &:hover {
     background-color: #ff6666;
   }
+`;
+
+const NoGoalsMessage = styled(Text)`
+  font-size: 1.2rem;
+  color: #555;
+  text-align: center;
 `;
 
 const Loading = styled.div`
