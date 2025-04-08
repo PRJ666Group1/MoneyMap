@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Container, Card, Title, Grid, Input, Checkbox, Button, Text, Select, Stack, NumberInput } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
-function FinancialGoal() {
+function FinancialGoal({ onGoalAdded }) {
   const { ipcRenderer } = window.electron;
 
   // **State Hooks for Form Fields**
@@ -84,6 +84,8 @@ function FinancialGoal() {
         setIncomeAmount("");
         setFrequency("");
         setTargetDate("");
+
+        onGoalAdded(); // Trigger update
       }
     } catch (error) {
       console.error("Error saving goal:", error);
@@ -215,7 +217,7 @@ const PageContainer = styled.div`
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #2b5f20, #54c166);
+  //background: linear-gradient(135deg, #2b5f20, #54c166);
   padding: 40px;
 `;
 

@@ -29,8 +29,7 @@ const linkData = [
   { icon: FaHome, label: 'Home', to: '/' },
   { icon: FaFileAlt, label: 'Log Transactions', to: 'log-transactions' }, // Represents document/logging
   { icon: FaChartLine, label: 'Track Budget, Income & Expenses', to: '/track-budget' }, // Represents financial tracking
-  { icon: FaBullseye, label: 'Set Financial Goal', to: '/financial-goal' }, // Represents goal setting
-  { icon: FaTachometerAlt, label: 'Financial Goal Dashboard', to: '/financial-goals-dashboard' }, // Represents dashboard/overview
+  { icon: FaBullseye, label: 'Set & Monitor Financial Goals', to: '/financial-goals-page' }, // Represents addgoal & goals dashboard
   { icon: FaCog, label: 'Settings (In Development)', to: '/settings' }, // Standard settings icon
 
 ];

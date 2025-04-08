@@ -3,30 +3,41 @@ import styled from "styled-components";
 import { Container, Card, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
-const FinancialGoalsDashboard = () => {
+const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded }) => {
   const [goals, setGoals] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch goals from the backend (IPC)
+  // Fetch goals from the backend (IPC), as a separate function outside of useEffect so it can be reused
+   const fetchGoals = async () => {
+    try {
+      const response = await window.electron.ipcRenderer.invoke("get-goals");
+      console.log("Response from IPC:", response); // Debugging
+
+      // Ensure goals is an array
+      setGoals(Array.isArray(response.goals) ? response.goals : []);
+    } catch (err) {
+      setError("Failed to fetch goals.");
+      console.error("Error fetching goals:", err);
+    } finally {
+      setLoading(false);
+      setGoalAdded(false); // Reset goalAdded flag to false after fetching goals
+    }
+  };
+
+
+  // Fetch goals on initial render
   useEffect(() => {
-    const fetchGoals = async () => {
-      try {
-        const response = await window.electron.ipcRenderer.invoke("get-goals");
-        console.log("Response from IPC:", response); // Debugging
-
-        // Ensure goals is an array
-        setGoals(Array.isArray(response.goals) ? response.goals : []);
-      } catch (err) {
-        setError("Failed to fetch goals.");
-        console.error("Error fetching goals:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchGoals();
   }, []);
+
+   // Re-fetch goals when `goalAdded` changes
+   useEffect(() => {
+    //console.log("goalAdded changed: ", goalAdded);  // Debugging
+    if (goalAdded) {
+      fetchGoals(); // Trigger goal fetch when goalAdded changes
+    }
+  }, [goalAdded]);
 
   // Delete a goal and refresh the goal list
   const handleDelete = async (id) => {
@@ -63,17 +74,13 @@ const FinancialGoalsDashboard = () => {
 
   return (
     <PageContainer>
-      {/* Header */}
-      <Header>
-        <HeaderTitle>Financial Goals Dashboard</HeaderTitle>
-        <HeaderSubtitle>Track and manage your financial goals effectively</HeaderSubtitle>
-      </Header>
+     
 
       {/* Main Content */}
       <ContentContainer>
         <StyledCard>
         {goals.length > 0 && (
-          <Title>Financial Goals</Title>
+          <Title>Financial Goals Dashboard</Title>
         )}
 
           {goals.length === 0 ? (
@@ -131,7 +138,7 @@ const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: linear-gradient(135deg, #2b5f20, #54c166);
+  //background: linear-gradient(135deg, #2b5f20, #54c166);
   padding: 20px;
   font-family: "Montserrat", sans-serif;
 `;
