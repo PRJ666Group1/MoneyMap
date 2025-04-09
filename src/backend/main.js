@@ -27,8 +27,6 @@ const createWindow = () => {
     },
   });
 
-  mainWindow.webContents.openDevTools();
-
   // start application at max window size and remove menu bar
   mainWindow.maximize();
   mainWindow.removeMenu();
