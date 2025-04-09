@@ -145,7 +145,7 @@ export default function Chat() {
 
     return (
         <Container size="xl">
-            <Flex direction="column" h="95vh" ff="var(--mantine-font-family, sans-serif)">
+            <Flex direction="column" h="100%" ff="var(--mantine-font-family, sans-serif)">
                 {/* Chat Area */}
                 <ScrollArea h="100%" p="md" mb={12} scrollbarSize={6}>
                     {messages.map((msg, index) => (
