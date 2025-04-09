@@ -179,11 +179,11 @@ const LogTransactions = () => {
             <Group justify="space-between">
               <Group>
                 <Autocomplete placeholder="Search"></Autocomplete>
-                <Button variant="subtle" c="white" color="green.9"><Text>Action</Text></Button>
-                <Button variant="subtle" c="white" color="green.9"><Text>Filter</Text></Button>
+                <Button c="white" color="green.7"><Text>Action</Text></Button>
+                <Button c="white" color="green.7"><Text>Filter</Text></Button>
               </Group>
               <Group>
-                <Button variant="subtle" c="white" color="green.9" onClick={openModal}>
+                <Button c="white" color="green.7" onClick={openModal}>
                   <Text>Add New</Text>
                 </Button>
               </Group>

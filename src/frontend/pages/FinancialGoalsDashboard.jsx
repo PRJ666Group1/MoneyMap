@@ -75,7 +75,7 @@ const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded, onAddNewClick }) => 
       <DashboardCard>
         <DashboardHeader>
           <Title c="white" order={1}>Financial Goals</Title>
-          <Button variant="subtle" c="white" color="green.9" onClick={onAddNewClick}><Text>Add New</Text></Button>
+          <Button c="white" color="green.7" onClick={onAddNewClick}><Text>Add New</Text></Button>
         </DashboardHeader>
 
         {/* Main Content */}

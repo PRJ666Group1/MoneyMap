@@ -90,7 +90,7 @@ const HomePage = () => {
                 mb="sm"
               >
                 <Text c="white">{item.category_name}</Text>
-                <Text fw="bolder" c={item.over_budget ? "var(--mantine-color-red-8)" : "var(--mantine-color-green-3)"}>
+                <Text fw="bolder" c={item.over_budget ? "var(--mantine-color-red-9)" : "var(--mantine-color-green-9)"}>
                   ${item.actual} / ${item.budgeted}
                 </Text>
               </Flex>
