@@ -5,6 +5,7 @@ import { Center, Stack, Tooltip, UnstyledButton } from '@mantine/core';
 import classes from './LeftSideBar.module.css';
 
 import { FaDollarSign } from 'react-icons/fa';
+import { SiChatbot } from "react-icons/si";
 import { FaHome } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { FaChartLine } from 'react-icons/fa';
@@ -29,7 +30,7 @@ const linkData = [
   { icon: FaFileAlt, label: 'Log Transactions', to: 'log-transactions' }, // Represents document/logging
   { icon: FaChartLine, label: 'Track Budget, Income & Expenses', to: '/track-budget' }, // Represents financial tracking
   { icon: FaBullseye, label: 'Set & Monitor Financial Goals', to: '/financial-goals-page' }, // Represents addgoal & goals dashboard
-  { icon: FaDollarSign, label: 'Chat', to: '/chat' }, // Standard settings icon
+  { icon: SiChatbot, label: 'Chat', to: '/chat' }, // Standard settings icon
   { icon: FaCog, label: 'Settings', to: '/settings' }, // Standard settings icon
 
 ];
