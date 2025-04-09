@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Container, Card, Text, Button } from "@mantine/core";
+import { Container, Card, Text, Button, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 
 const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded, onAddNewClick }) => {
@@ -71,11 +71,11 @@ const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded, onAddNewClick }) => 
   if (error) return <Error>{error}</Error>;
 
   return (
-    <PageContainer>
+    <Container size="xl">
       <DashboardCard>
         <DashboardHeader>
-          <DashboardTitle>Financial Goals</DashboardTitle>
-          <AddButton onClick={onAddNewClick}>+ Add New</AddButton>
+          <Title c="white" order={1}>Financial Goals</Title>
+          <Button variant="subtle" c="white" color="green.9" onClick={onAddNewClick}><Text>Add New</Text></Button>
         </DashboardHeader>
 
         {/* Main Content */}
@@ -122,28 +122,19 @@ const FinancialGoalsDashboard = ({ goalAdded, setGoalAdded, onAddNewClick }) => 
           </GoalsTable>
         )}
       </DashboardCard>
-    </PageContainer>
+    </Container>
   );
 };
 
 export default FinancialGoalsDashboard;
 
 // Styled Components
-const PageContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, #2b5f20, #54c166);
-  padding: 20px;
-`;
 
 const DashboardCard = styled(Card)`
   width: 90%; /* Wider dashboard */
   max-width: 1200px;
   padding: 20px;
-  border-radius: 15px;
-  background-color: #ffffff; /* White background for contrast */
+  background-color: var(--mantine-color-green-6); /* White background for contrast */
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 `;
 
@@ -152,22 +143,6 @@ const DashboardHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-`;
-
-const DashboardTitle = styled.h1`
-  font-size: 2rem;
-  font-weight: bold;
-  color: #2b5f20; /* Dark green for the title */
-`;
-
-const AddButton = styled(Button)`
-  background-color: #397d2c; /* Green button */
-  color: white;
-  font-weight: bold;
-
-  &:hover {
-    background-color: #2b5f20; /* Darker green on hover */
-  }
 `;
 
 const GoalsTable = styled.table`
@@ -185,10 +160,10 @@ const TableHeader = styled.th`
 
 const TableRow = styled.tr`
   &:nth-child(even) {
-    background-color: #f9f9f9;
+    background-color: var(--mantine-color-green-7);
   }
   &:hover {
-    background-color: #e6ffe6;
+    background-color: var(--mantine-color-green-5); /* Light green on hover */
     cursor: pointer;
   }
 `;
@@ -199,7 +174,7 @@ const TableData = styled.td`
 `;
 
 const DeleteButton = styled.button`
-  background-color: #ff4d4d;
+  background-color: var(--mantine-color-red-9); /* Red button */
   color: white;
   padding: 5px 10px;
   border: none;

@@ -6,6 +6,7 @@ import {
   Table,
   Stack,
   Group,
+  Title,
   Button,
   Autocomplete,
   Modal,
@@ -170,155 +171,158 @@ const LogTransactions = () => {
   };
 
   return (
-    <Container size="xl">
-      <Card bg="green.4">
-        <Stack>
-          <Group justify="space-between">
-            <Group>
-              <Autocomplete placeholder="Search"></Autocomplete>
-              <Button color="green">Action</Button>
-              <Button color="green">Filter</Button>
+    <>
+      <Container size="xl">
+        <Card bg="green.6">
+          <Stack>
+            <Title mb="md" c="white" order={1}>Transaction Logs</Title>
+            <Group justify="space-between">
+              <Group>
+                <Autocomplete placeholder="Search"></Autocomplete>
+                <Button variant="subtle" c="white" color="green.9"><Text>Action</Text></Button>
+                <Button variant="subtle" c="white" color="green.9"><Text>Filter</Text></Button>
+              </Group>
+              <Group>
+                <Button variant="subtle" c="white" color="green.9" onClick={openModal}>
+                  <Text>Add New</Text>
+                </Button>
+              </Group>
             </Group>
-            <Group>
-              <Button color="green" onClick={openModal}>
-                + Add New Transaction
-              </Button>
-            </Group>
-          </Group>
-          <Table>
-            <Table.Thead>
-              <Table.Tr>
-                <Table.Th><Text fw="bold" span>ID.</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Name</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Date</Text></Table.Th>
-                <Table.Th> <Text fw="bold" span>Status</Text></Table.Th>
-                <Table.Th><Text fw="bold" span>Amount</Text></Table.Th>
-              </Table.Tr>
-            </Table.Thead>
-            <Table.Tbody>
-              {transactions.length === 0 ?
+            <Table>
+              <Table.Thead>
                 <Table.Tr>
-                  <Table.Td colSpan={5}>
-                    <Text align="center">No transactions found.</Text>
-                  </Table.Td>
+                  <Table.Th><Text fw="bold" span>ID.</Text></Table.Th>
+                  <Table.Th><Text fw="bold" span>Name</Text></Table.Th>
+                  <Table.Th><Text fw="bold" span>Date</Text></Table.Th>
+                  <Table.Th> <Text fw="bold" span>Status</Text></Table.Th>
+                  <Table.Th><Text fw="bold" span>Amount</Text></Table.Th>
                 </Table.Tr>
-                : transactions.map((transaction, index) => (
-                  <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
-                    cursor: "pointer", transition: "background 0.2s ease-in-out",
-                  }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
-                    <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
-                    <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
-                    <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
-                    <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
-                    <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
-                    <Table.Td>
-                      <Button variant="subtle" color="red" size="xs" onClick={(e) => {
-                        e.stopPropagation(); // Prevent row double-click from triggering edit
-                        console.log("Delete transaction:", transaction.dataValues.id); // Debugging
-                        confirmDeleteTransaction(transaction.dataValues.id);
-                      }}>
-                        <IoIosClose size={20} />
-                      </Button>
+              </Table.Thead>
+              <Table.Tbody>
+                {transactions.length === 0 ?
+                  <Table.Tr>
+                    <Table.Td colSpan={5}>
+                      <Text mt="md" align="center">No transactions found.</Text>
                     </Table.Td>
                   </Table.Tr>
-                ))}
-            </Table.Tbody>
-          </Table>
-        </Stack>
-      </Card>
+                  : transactions.map((transaction, index) => (
+                    <Table.Tr key={index} onDoubleClick={() => handleEditTransaction(transaction)} style={{
+                      cursor: "pointer", transition: "background 0.2s ease-in-out",
+                    }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "var(--mantine-color-green-3)")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
+                      <Table.Td><Text span>{transaction.dataValues.id}</Text></Table.Td>
+                      <Table.Td><Text span>{transaction.dataValues.name}</Text></Table.Td>
+                      <Table.Td><Text span>{transaction.dataValues.date}</Text></Table.Td>
+                      <Table.Td><Text span>{transaction.dataValues.status}</Text></Table.Td>
+                      <Table.Td><Text span>${transaction.dataValues.amount}</Text></Table.Td>
+                      <Table.Td>
+                        <Button variant="subtle" color="red" size="xs" onClick={(e) => {
+                          e.stopPropagation(); // Prevent row double-click from triggering edit
+                          console.log("Delete transaction:", transaction.dataValues.id); // Debugging
+                          confirmDeleteTransaction(transaction.dataValues.id);
+                        }}>
+                          <IoIosClose size={20} />
+                        </Button>
+                      </Table.Td>
+                    </Table.Tr>
+                  ))}
+              </Table.Tbody>
+            </Table>
+          </Stack>
+        </Card>
 
-      <Modal
-        opened={deleteModalOpened}
-        onClose={closeDeleteModal}
-        title="Confirm Deletion"
-        overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 3,
-        }}
-      >
-        <Text>Are you sure you want to delete this transaction?</Text>
-        <Group justify="flex-end" mt="md">
-          <Button variant="default" onClick={closeDeleteModal}>
-            Cancel
-          </Button>
-          <Button color="red" onClick={handleDeleteTransaction}>
-            Delete
-          </Button>
-        </Group>
-      </Modal>
+        <Modal
+          opened={deleteModalOpened}
+          onClose={closeDeleteModal}
+          title="Confirm Deletion"
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+        >
+          <Text>Are you sure you want to delete this transaction?</Text>
+          <Group justify="flex-end" mt="md">
+            <Button variant="default" onClick={closeDeleteModal}>
+              Cancel
+            </Button>
+            <Button color="red" onClick={handleDeleteTransaction}>
+              Delete
+            </Button>
+          </Group>
+        </Modal>
 
 
-      <ErrorModal
-        opened={errorModalOpened}
-        message={errorMessage}
-        onClose={() => closeErrorModal()}
-      />
+        <ErrorModal
+          opened={errorModalOpened}
+          message={errorMessage}
+          onClose={() => closeErrorModal()}
+        />
 
-      <Modal
-        opened={modalOpened}
-        onClose={() => {
-          setEditMode(false);
-          setEditingTransaction(null);
-          closeModal();
-          resetModalValues();
-        }}
-        title={editingTransaction ? "Edit Transaction" : "Add New Transaction"}
-        overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 3,
-        }}
-      >
-        <Stack align="center">
-          <Autocomplete
-            w="100%"
-            placeholder="Name"
-            value={name}
-            onChange={setName}
-          />
-          <DatePicker placeholder="Date" value={date} onChange={setDate} />
-          <Combobox
-            store={statusCombobox}
-            onOptionSubmit={(val) => {
-              setStatusValue(val);
-              statusCombobox.closeDropdown();
-            }}
-            w="100%"
-          >
-            <Combobox.Target>
-              <InputBase
-                component="button"
-                type="button"
-                pointer
-                rightSection={<Combobox.Chevron />}
-                rightSectionPointerEvents="none"
-                onClick={() => statusCombobox.toggleDropdown()}
-              >
-                {statusValue || <Input.Placeholder>Status</Input.Placeholder>}
-              </InputBase>
-            </Combobox.Target>
+        <Modal
+          opened={modalOpened}
+          onClose={() => {
+            setEditMode(false);
+            setEditingTransaction(null);
+            closeModal();
+            resetModalValues();
+          }}
+          title={editingTransaction ? "Edit Transaction" : "Add New Transaction"}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+        >
+          <Stack align="center">
+            <Autocomplete
+              w="100%"
+              placeholder="Name"
+              value={name}
+              onChange={setName}
+            />
+            <DatePicker placeholder="Date" value={date} onChange={setDate} />
+            <Combobox
+              store={statusCombobox}
+              onOptionSubmit={(val) => {
+                setStatusValue(val);
+                statusCombobox.closeDropdown();
+              }}
+              w="100%"
+            >
+              <Combobox.Target>
+                <InputBase
+                  component="button"
+                  type="button"
+                  pointer
+                  rightSection={<Combobox.Chevron />}
+                  rightSectionPointerEvents="none"
+                  onClick={() => statusCombobox.toggleDropdown()}
+                >
+                  {statusValue || <Input.Placeholder>Status</Input.Placeholder>}
+                </InputBase>
+              </Combobox.Target>
 
-            <Combobox.Dropdown>
-              <Combobox.Options>{statusOptions}</Combobox.Options>
-            </Combobox.Dropdown>
-          </Combobox>
-          <NumberInput
-            w="100%"
-            placeholder="Amount"
-            prefix="$"
-            value={amount}
-            onChange={setAmount}
-          />
-          <Button
-            color="green"
-            onClick={() => handleSaveTransaction()}
-          >
-            {editMode ? "Update" : "Save"}
-          </Button>
-        </Stack>
-      </Modal>
-    </Container>
+              <Combobox.Dropdown>
+                <Combobox.Options>{statusOptions}</Combobox.Options>
+              </Combobox.Dropdown>
+            </Combobox>
+            <NumberInput
+              w="100%"
+              placeholder="Amount"
+              prefix="$"
+              value={amount}
+              onChange={setAmount}
+            />
+            <Button
+              color="green"
+              onClick={() => handleSaveTransaction()}
+            >
+              {editMode ? "Update" : "Save"}
+            </Button>
+          </Stack>
+        </Modal>
+      </Container>
+    </>
   );
 };
 

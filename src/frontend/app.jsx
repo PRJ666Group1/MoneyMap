@@ -33,7 +33,7 @@ function App() {
     <MantineProvider theme={theme} withGlobalStyles withNormalizeCSS>
       <Notifications position="top-right" />
       <HashRouter>
-        <Flex mih="100vh" bg="#397d2c">
+        <Flex mih="100vh" bg="linear-gradient(180deg, var(--mantine-color-green-9), var(--mantine-color-green-6))">
           {/* Sidebar */}
           <LeftSidebar />
 

@@ -343,201 +343,204 @@ const ExpenseTracker = () => {
 
 
   return (
-    <Container fluid style={{ backgroundColor: "white", padding: "20px" }}>
-      <Grid>
-        {/* Left Section: Controls */}
-        <Grid.Col span={4}>
-          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#d9dee3" }}>
-            <Stack>
-              <Title order={3} style={{ color: "#333" }}>Budget Controls</Title>
+    <>
+      <Container size="xl" bg="green.6" p={20}>
+        <Title mb="md" c="white" order={1}>Budget/Expense Tracker</Title>
+        <Grid>
+          {/* Left Section: Controls */}
+          <Grid.Col span={4}>
+            <Card shadow="xs" padding="lg" bg="green.5">
+              <Stack>
+                <Title order={3} c="white">Budget Controls</Title>
 
-              {/* Update Income */}
-              <Button onClick={updateIncomeModalOpen} style={{ backgroundColor: "#4caf50", color: "white" }}>
-                Update Income
-              </Button>
+                {/* Update Income */}
+                <Button color="green.6" c="white" onClick={updateIncomeModalOpen}>
+                  Update Income
+                </Button>
 
-              {/* Add Expense */}
-              <Button onClick={expenseModalOpen} style={{ backgroundColor: "#2196f3", color: "white" }}>
-                Add Expense
-              </Button>
+                {/* Add Expense */}
+                <Button color="blue.6" c="white" onClick={expenseModalOpen}>
+                  Add Expense
+                </Button>
 
-              {/* Save Budget */}
-              <Button fullWidth onClick={handleSaveBudget} style={{ backgroundColor: "#ff9800", color: "white" }}>
-                {budgetId ? "Update Budget" : "Save Budget"}
-              </Button>
+                {/* Save Budget */}
+                <Button color="yellow.6" c="white" onClick={handleSaveBudget}>
+                  {budgetId ? "Update Budget" : "Save Budget"}
+                </Button>
 
-              {incomeToExpenseRatio !== null ? (
-                <>
-                  <Title order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
-                </>
-              ) : (
-                <Text>
-                  {income > 0 ? "Add expenses to see the budget overview." : "Please enter your monthly income."}
-                </Text>
-              )}
+                {incomeToExpenseRatio !== null ? (
+                  <>
+                    <Title c="white" order={4} mt="md">Income to Expense Ratio: {incomeToExpenseRatio.toFixed(2)}%</Title>
+                  </>
+                ) : (
+                  <Text>
+                    {income > 0 ? "Add expenses to see the budget overview." : "Please enter your monthly income."}
+                  </Text>
+                )}
 
-              {/* Expense List */}
-              <Stack spacing="xs" mt="md">
-                {chartData.map((entry, index) => (
-                  <Card key={index} padding="xs" shadow="sm" radius="md" style={{ backgroundColor: "#fff" }}>
-                    <Grid align="center">
-                      <Grid.Col span={6}>
-                        <Group>
-                          <ThemeIcon color={entry.color} radius="xl" />
-                          <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
-                        </Group>
-                      </Grid.Col>
-                      <Grid.Col span={3}>
-                        <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
-                      </Grid.Col>
-                      <Grid.Col span={3} style={{ display: "flex", justifyContent: "flex-end" }}>
-                        <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
-                          <IoIosClose size={20} />
-                        </Button>
-                      </Grid.Col>
-                    </Grid>
-                  </Card>
-                ))}
-              </Stack>
-            </Stack>
-          </Card>
-        </Grid.Col>
-
-        {/* Right Section: Table and Charts */}
-        <Grid.Col span={8}>
-          <Card shadow="xs" padding="lg" style={{ backgroundColor: "#d9dee3" }}>
-            <Stack>
-              <Title order={3} style={{ color: "#333" }}>Budget Overview</Title>
-
-              {/* Income Left as Text */}
-              <Text size="lg" fw={500} style={{ color: incomeLeft >= 0 ? "green" : "red" }}>
-                Income Left: ${incomeLeft.toFixed(2)}
-              </Text>
-
-              {/* Table */}
-              <Table striped highlightOnHover>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: "left" }}>Category</th>
-                    <th style={{ textAlign: "left" }}>Amount</th>
-                    <th style={{ textAlign: "right" }}>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
+                {/* Expense List */}
+                <Stack spacing="xs" mt="md">
                   {chartData.map((entry, index) => (
-                    <tr key={index}>
-                      <td style={{ textAlign: "left" }}>
-                        <Group>
-                          <ThemeIcon color={entry.color} radius="xl" />
-                          <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
-                        </Group>
-                      </td>
-                      <td style={{ textAlign: "left" }}>
-                        <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
-                          <IoIosClose size={20} />
-                        </Button>
-                      </td>
-                    </tr>
+                    <Card key={index} padding="xs" shadow="sm" radius="md" bg="green.4">
+                      <Grid align="center">
+                        <Grid.Col span={6}>
+                          <Group>
+                            <ThemeIcon color={entry.color} radius="xl" />
+                            <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
+                          </Group>
+                        </Grid.Col>
+                        <Grid.Col span={3}>
+                          <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
+                        </Grid.Col>
+                        <Grid.Col span={3} style={{ display: "flex", justifyContent: "flex-end" }}>
+                          <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
+                            <IoIosClose size={20} />
+                          </Button>
+                        </Grid.Col>
+                      </Grid>
+                    </Card>
                   ))}
-                </tbody>
-              </Table>
+                </Stack>
+              </Stack>
+            </Card>
+          </Grid.Col>
 
-              {/* Toggle Charts Button */}
-              <Button onClick={() => setShowCharts(!showCharts)} style={{ backgroundColor: "#9c27b0", color: "white" }}>
-                {showCharts ? "Hide Charts" : "Show Charts"}
-              </Button>
+          {/* Right Section: Table and Charts */}
+          <Grid.Col span={8}>
+            <Card shadow="xs" padding="lg" bg="green.5">
+              <Stack>
+                <Title order={3} c="white">Budget Overview</Title>
 
-              {/* Charts */}
-              {showCharts && (!expenseData || expenseData.length === 0) &&(
-                <Text style={{ fontWeight: 'bold', color: 'red' }}>Please add an expense to see the charts</Text>
-              )}
+                {/* Income Left as Text */}
+                <Text size="lg" fw={500} style={{ color: incomeLeft >= 0 ? "green" : "red" }}>
+                  Income Left: ${incomeLeft.toFixed(2)}
+                </Text>
 
-              {showCharts && chartData &&(
-                <Tabs defaultValue="pie">
-                  <Tabs.List>
-                    <Tabs.Tab value="pie">Pie Chart</Tabs.Tab>
-                    <Tabs.Tab value="bar">Bar Chart</Tabs.Tab>
-                    <Tabs.Tab value="line">Line Chart</Tabs.Tab> {/* Re-added Line Chart */}
-                  </Tabs.List>
+                {/* Table */}
+                <Table verticalSpacing="lg" striped highlightOnHover withRowBorders={false} highlightOnHoverColor="green.3" stripedColor="green.4">
+                  <Table.Thead>
+                    <Table.Tr>
+                      <Table.Th style={{ textAlign: "left" }}>Category</Table.Th>
+                      <Table.Th style={{ textAlign: "left" }}>Amount</Table.Th>
+                      <Table.Th style={{ textAlign: "right" }}>Action</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {chartData.map((entry, index) => (
+                      <Table.Tr key={index}>
+                        <Table.Td style={{ textAlign: "left" }}>
+                          <Group>
+                            <ThemeIcon color={entry.color} radius="xl" />
+                            <Text fw="bold" style={{ color: "#333" }}>{entry.name}</Text>
+                          </Group>
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: "left" }}>
+                          <Text fw={500} c="red.9">${entry.value.toFixed(2)}</Text>
+                        </Table.Td>
+                        <Table.Td style={{ textAlign: "right" }}>
+                          <Button variant="subtle" color="red" size="xs" onClick={() => handleDeleteExpense(entry.name)}>
+                            <IoIosClose size={20} />
+                          </Button>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
 
-                  <Tabs.Panel value="pie">
-                    <PieChart
-                      size={400}
-                      pieProps={{ opacity: 0.7 }}
-                      withLabelsLine
-                      labelsPosition="outside"
-                      labelsType="percent"
-                      withLabels
-                      data={chartData}
-                      withTooltip
-                    />
-                  </Tabs.Panel>
+                {/* Toggle Charts Button */}
+                <Button onClick={() => setShowCharts(!showCharts)} style={{ backgroundColor: "#9c27b0", color: "white" }}>
+                  {showCharts ? "Hide Charts" : "Show Charts"}
+                </Button>
 
-                  <Tabs.Panel value="bar">
-                    <BarChart
-                      h={400}
-                      data={chartData}
-                      dataKey="name"
-                      series={[{ name: "value", color: "black" }]}
-                      withYAxis
-                      withXAxis
-                      valueFormatter={(value) => "$" + new Intl.NumberFormat("en-US").format(value)}
-                      withBarValueLabel
-                      valueLabelProps={{ position: "inside", fill: "white" }}
-                      tooltipAnimationDuration={200}
-                      barLabelColor="dark.9"
-                    />
-                  </Tabs.Panel>
+                {/* Charts */}
+                {showCharts && (!expenseData || expenseData.length === 0) && (
+                  <Text style={{ fontWeight: 'bold', color: 'red' }}>Please add an expense to see the charts</Text>
+                )}
 
-                  <Tabs.Panel value="line">
-                    <LineChart
-                      h={400}
-                      data={chartData}
-                      dataKey="name"
-                      series={[{ name: "value", color: "blue" }]}
-                      withYAxis
-                      withXAxis
-                      curveType="linear"
-                      withTooltip
-                      tooltipAnimationDuration={200}
-                      strokeWidth={2}
-                    />
-                  </Tabs.Panel>
-                </Tabs>
-              )}
-            </Stack>
-          </Card>
-        </Grid.Col>
-      </Grid>
+                {showCharts && chartData && (
+                  <Tabs variant="pills" defaultValue="pie">
+                    <Tabs.List mb="md">
+                      <Tabs.Tab value="pie">Pie Chart</Tabs.Tab>
+                      <Tabs.Tab value="bar">Bar Chart</Tabs.Tab>
+                      <Tabs.Tab value="line">Line Chart</Tabs.Tab> {/* Re-added Line Chart */}
+                    </Tabs.List>
 
-      {/* Modals */}
-      <Modal centered opened={updateIncomeModalOpened} onClose={updateIncomeModalClose} title="Update Income">
-        <Stack>
-          <Text>Current income: <Text span inherit c="green">${income}</Text></Text>
-          <NumberInput placeholder="Monthly Income" allowNegative={false} value={tempIncome} onChange={setTempIncome} prefix="$" />
-          <Button fullWidth mt="md" onClick={() => { setIncome(tempIncome); updateIncomeModalClose(); }}>Done</Button>
-        </Stack>
-      </Modal>
+                    <Tabs.Panel value="pie">
+                      <PieChart
+                        size={400}
+                        pieProps={{ opacity: 0.7 }}
+                        withLabelsLine
+                        labelsPosition="outside"
+                        labelsType="percent"
+                        withLabels
+                        data={chartData}
+                        withTooltip
+                      />
+                    </Tabs.Panel>
 
-      <Modal centered opened={expenseModalOpened} onClose={expenseModalClose} title="Add Expense">
-        <Stack>
-          <NumberInput placeholder="Expense Amount" value={expense} onChange={setExpense} prefix="$" />
-          <Select placeholder="Select Category" value={category} onChange={setCategory} data={categories.map((item) => item.name)} />
-          <Group justify="space-between">
-            <Button onClick={categoryModalOpen}>Add Custom Category</Button>
-            <Button onClick={handleAddExpense}>Add Expense</Button>
-          </Group>
-        </Stack>
-      </Modal>
+                    <Tabs.Panel value="bar">
+                      <BarChart
+                        h={400}
+                        data={chartData}
+                        dataKey="name"
+                        series={[{ name: "value", color: "black" }]}
+                        withYAxis
+                        withXAxis
+                        valueFormatter={(value) => "$" + new Intl.NumberFormat("en-US").format(value)}
+                        withBarValueLabel
+                        valueLabelProps={{ position: "inside", fill: "white" }}
+                        tooltipAnimationDuration={200}
+                        barLabelColor="dark.9"
+                      />
+                    </Tabs.Panel>
 
-      <Modal centered opened={categoryModalOpened} onClose={categoryModalClose} title="Add Custom Category">
-        <Input placeholder="Name of Custom Category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
-        <Button fullWidth mt="md" onClick={handleAddCategory}>Add</Button>
-      </Modal>
-    </Container>
+                    <Tabs.Panel value="line">
+                      <LineChart
+                        h={400}
+                        data={chartData}
+                        dataKey="name"
+                        series={[{ name: "value", color: "blue" }]}
+                        withYAxis
+                        withXAxis
+                        curveType="linear"
+                        withTooltip
+                        tooltipAnimationDuration={200}
+                        strokeWidth={2}
+                      />
+                    </Tabs.Panel>
+                  </Tabs>
+                )}
+              </Stack>
+            </Card>
+          </Grid.Col>
+        </Grid>
+
+        {/* Modals */}
+        <Modal centered opened={updateIncomeModalOpened} onClose={updateIncomeModalClose} title="Update Income">
+          <Stack>
+            <Text>Current income: <Text span inherit c="green">${income}</Text></Text>
+            <NumberInput placeholder="Monthly Income" allowNegative={false} value={tempIncome} onChange={setTempIncome} prefix="$" />
+            <Button fullWidth mt="md" onClick={() => { setIncome(tempIncome); updateIncomeModalClose(); }}>Done</Button>
+          </Stack>
+        </Modal>
+
+        <Modal centered opened={expenseModalOpened} onClose={expenseModalClose} title="Add Expense">
+          <Stack>
+            <NumberInput placeholder="Expense Amount" value={expense} onChange={setExpense} prefix="$" />
+            <Select placeholder="Select Category" value={category} onChange={setCategory} data={categories.map((item) => item.name)} />
+            <Group justify="space-between">
+              <Button onClick={categoryModalOpen}>Add Custom Category</Button>
+              <Button onClick={handleAddExpense}>Add Expense</Button>
+            </Group>
+          </Stack>
+        </Modal>
+
+        <Modal centered opened={categoryModalOpened} onClose={categoryModalClose} title="Add Custom Category">
+          <Input placeholder="Name of Custom Category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} />
+          <Button fullWidth mt="md" onClick={handleAddCategory}>Add</Button>
+        </Modal>
+      </Container>
+    </>
   );
 };
 

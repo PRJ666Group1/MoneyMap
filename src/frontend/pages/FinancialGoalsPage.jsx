@@ -2,19 +2,18 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import FinancialGoal from "./FinancialGoal.jsx";
 import FinancialGoalsDashboard from "./FinancialGoalsDashboard.jsx";
+import { Flex, Container } from "@mantine/core";
 
 const PageContainer = styled.div`
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  background: linear-gradient(135deg, #2b5f20, #54c166);
-  min-height: 100vh;
+  max-height: 100vh;
 `;
 
 const FormContainer = styled.div`
   padding: 2rem;
-  background: linear-gradient(135deg, #2b5f20, #54c166);
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   max-width: auto;
@@ -38,20 +37,24 @@ export default function FinancialGoalsPage() {
   };
 
   return (
-    <PageContainer>
-      {showForm ? (
-        <FormContainer>
-          <CloseButton onClick={() => setShowForm(false)}>×</CloseButton>
-          <FinancialGoal onGoalAdded={handleGoalAdded} />
-        </FormContainer>
-      ) : (
-        <FinancialGoalsDashboard
-          goalAdded={goalAdded}
-          setGoalAdded={setGoalAdded}
-          onAddNewClick={handleAddNewClick} // Pass the handler for "Add New"
-        />
-      )}
-    </PageContainer>
+    <>
+      <Flex pos="absolute" top={0} left={0} bg="linear-gradient(180deg, var(--mantine-color-green-9), var(--mantine-color-green-6))" w="100vw" h="100vh" style={{ zIndex: 0 }} />
+
+      <Container size="xl">
+        {showForm ? (
+          <Container>
+            <CloseButton onClick={() => setShowForm(false)}>×</CloseButton>
+            <FinancialGoal onGoalAdded={handleGoalAdded} />
+          </Container>
+        ) : (
+          <FinancialGoalsDashboard
+            goalAdded={goalAdded}
+            setGoalAdded={setGoalAdded}
+            onAddNewClick={handleAddNewClick} // Pass the handler for "Add New"
+          />
+        )}
+      </Container>
+    </>
   );
 }
 
@@ -59,10 +62,10 @@ export default function FinancialGoalsPage() {
 const CloseButton = styled.button`
   position: absolute;
   top: 10px;
-  right: 10px;
+  right: 20px;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 3.5rem;
   font-weight: bold;
   color: #333;
   cursor: pointer;
