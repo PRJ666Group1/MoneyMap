@@ -9,7 +9,6 @@ import { FaHome } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { FaChartLine } from 'react-icons/fa';
 import { FaBullseye } from 'react-icons/fa';;
-import { FaTachometerAlt } from 'react-icons/fa';
 import { FaCog } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 
@@ -30,6 +29,7 @@ const linkData = [
   { icon: FaFileAlt, label: 'Log Transactions', to: 'log-transactions' }, // Represents document/logging
   { icon: FaChartLine, label: 'Track Budget, Income & Expenses', to: '/track-budget' }, // Represents financial tracking
   { icon: FaBullseye, label: 'Set & Monitor Financial Goals', to: '/financial-goals-page' }, // Represents addgoal & goals dashboard
+  { icon: FaDollarSign, label: 'Chat', to: '/chat' }, // Standard settings icon
   { icon: FaCog, label: 'Settings (In Development)', to: '/settings' }, // Standard settings icon
 
 ];
