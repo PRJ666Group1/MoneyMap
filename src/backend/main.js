@@ -55,7 +55,7 @@ app.whenReady().then(async () => {
         responseHeaders: {
           ...details.responseHeaders,
           "Content-Security-Policy": [
-            "default-src 'self'; connect-src 'self' http://localhost:4000; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
+            "default-src 'self'; connect-src 'self' https://moneymap.fadaei.dev/; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
           ],
         },
       });

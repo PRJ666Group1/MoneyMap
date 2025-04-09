@@ -6,9 +6,19 @@ import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
 
 export default function Chat() {
+  const { ipcRenderer } = window.electron;
     const initialMessage = {
         role: "assistant",
         content: "Hi! I'm your MoneyMap assistant. How can I help you today?",
+    };
+
+    const initialData = async () => {
+        let data = await ipcRenderer.invoke("export-json");
+
+        return {
+            role: "system",
+            content: JSON.stringify(data.data)
+        }
     };
 
     const [messages, setMessages] = useState([]);
@@ -40,19 +50,21 @@ export default function Chat() {
     const sendMessage = async () => {
         if (!input.trim()) return;
 
-        const newMessages = [...messages, { role: "user", content: input }];
+        const loadInitialData = await initialData();
+        console.log(loadInitialData)
+        const newMessages = [...messages, loadInitialData, { role: "user", content: input }];
         setMessages(newMessages);
         setInput("");
         setLoading(true);
 
         try {
-            const res = await fetch("http://localhost:4000/api/chat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: "Bearer supersecret123",
-                },
-                body: JSON.stringify({ messages: newMessages }),
+            const res = await fetch("https://moneymap.fadaei.dev/api/chat", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer supersecret123",
+              },
+              body: JSON.stringify({ messages: newMessages }),
             });
 
             const data = await res.json();
@@ -145,6 +157,7 @@ export default function Chat() {
                             style={{
                                 marginBottom: 12,
                                 textAlign: msg.role === "user" ? "right" : "left",
+                                display: msg.role === "system" ? "none" : "block"
                             }}
                         >
                             <div
