@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Tooltip, Container, Flex, ScrollArea, Textarea, Button, Group, Stack, Loader, Text, Card, Drawer } from '@mantine/core';
+import { Tooltip, Container, Flex, ScrollArea, Textarea, Button, Group, Stack, Loader, Text, Card, Drawer, Modal } from '@mantine/core';
 import { FaTrash } from 'react-icons/fa';
 import { IoSend } from "react-icons/io5";
 import { FaSave } from "react-icons/fa";
@@ -34,6 +34,9 @@ export default function Chat() {
     const [chatId, setChatId] = useState(null);
     const [savedChats, setSavedChats] = useState({});
     const [drawerOpened, setDrawerOpened] = useState(false); // State to control the drawer visibility
+    const [deleteModalOpened, setDeleteModalOpened] = useState(false); // Modal visibility for delete
+    const [chatIdToDelete, setChatIdToDelete] = useState(null); // Store the chatId to delete
+
     const endOfMessagesRef = useRef(null);
 
     useEffect(() => {
@@ -129,18 +132,30 @@ export default function Chat() {
         });
     };
 
-    const deleteChat = (id) => {
-        if (confirm("Are you sure you want to delete this chat?")) {
+    // Modal confirmation for delete chat
+    const confirmDeleteChat = () => {
+        if (chatIdToDelete) {
             const updatedChats = { ...savedChats };
-            delete updatedChats[id];
+            delete updatedChats[chatIdToDelete];
             setSavedChats(updatedChats);
             localStorage.setItem("savedChats", JSON.stringify(updatedChats));
 
-            if (chatId === id) {
+            if (chatId === chatIdToDelete) {
                 sessionStorage.removeItem("activeChatId");
                 startNewChat();
             }
         }
+        closeDeleteModal();
+    };
+
+    const openDeleteModal = (id) => {
+        setChatIdToDelete(id);
+        setDeleteModalOpened(true);
+    };
+
+    const closeDeleteModal = () => {
+        setDeleteModalOpened(false);
+        setChatIdToDelete(null);
     };
 
     return (
@@ -240,7 +255,7 @@ export default function Chat() {
                                         {new Date(Number(id)).toLocaleString()}
                                     </Button>
                                     <Button
-                                        onClick={() => deleteChat(id)}
+                                        onClick={() => openDeleteModal(id)}
                                         variant="subtle"
                                         color="red"
                                         className={classes.deleteChatButton}
@@ -253,6 +268,27 @@ export default function Chat() {
                         </Stack>
                     )}
                 </Drawer>
+
+                {/* Modal Confirmation for Deleting a Chat */}
+                <Modal
+                    opened={deleteModalOpened}
+                    onClose={closeDeleteModal}
+                    title="Confirm Deletion"
+                    overlayProps={{
+                        backgroundOpacity: 0.55,
+                        blur: 3,
+                    }}
+                >
+                    <Text>Are you sure you want to delete this chat?</Text>
+                    <Group justify="flex-end" mt="md">
+                        <Button variant="default" onClick={closeDeleteModal}>
+                            Cancel
+                        </Button>
+                        <Button color="red" onClick={confirmDeleteChat}>
+                            Delete
+                        </Button>
+                    </Group>
+                </Modal>
             </Flex>
         </Container>
     );
