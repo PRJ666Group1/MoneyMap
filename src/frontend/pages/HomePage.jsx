@@ -122,7 +122,7 @@ const HomePage = () => {
       try {
         const message = await ipcRenderer.invoke("export-json");
         
-        const res = await fetch("http://localhost:4000/api/data", {
+        const res = await fetch("https://moneymap.fadaei.dev/api/data", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

@@ -7,6 +7,8 @@ import "@mantine/core/styles.css";
 import "@mantine/dates/styles.css";
 import '@mantine/notifications/styles.css';
 import '@mantine/charts/styles.css';
+import "katex/dist/katex.min.css";
+
 
 // Supports weights 100-900
 import '@fontsource-variable/montserrat';
@@ -19,6 +21,7 @@ import FinancialGoalsPage from "./pages/FinancialGoalsPage.jsx";
 import LogTransactions from "./pages/LogTransactions.jsx";
 import TrackBudget from "./pages/TrackBudget.jsx"; // Import TrackBudget
 import Settings from "./pages/Settings.jsx"; // Import Settings
+import Chat from "./pages/Chat.jsx";
 
 const theme = createTheme({
   primaryColor: "green",
@@ -44,6 +47,7 @@ function App() {
               <Route path="/financial-goals-page" element={<FinancialGoalsPage />} />
               <Route path="/track-budget" element={<TrackBudget />} /> {/* Add the new route here */}
               <Route path="/settings" element={<Settings />} />
+              <Route path="/chat" element={<Chat />} />
             </Routes>
           </Container>
         </Flex>
