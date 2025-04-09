@@ -14,7 +14,7 @@
 
 .assistantMessage {
   justify-self: flex-start;
-  background-color: color-mix(in srgb, var(--mantine-color-gray-2), transparent 95%);
+  background-color: color-mix(in srgb, var(--mantine-color-gray-9), transparent 85%);
 }
 
 .hidden {
