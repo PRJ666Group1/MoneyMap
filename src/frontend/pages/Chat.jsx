@@ -1,12 +1,19 @@
-"use client";
-
 import React, { useState, useRef, useEffect } from "react";
+import { Tooltip, Container, Flex, ScrollArea, Textarea, Button, Group, Stack, Loader, Text, Card, Drawer } from '@mantine/core';
+import { FaTrash } from 'react-icons/fa';
+import { IoSend } from "react-icons/io5";
+import { FaSave } from "react-icons/fa";
+import { FaHistory } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { notifications } from "@mantine/notifications";
+
+import classes from "../../styles/Chat.module.css";
 
 export default function Chat() {
-  const { ipcRenderer } = window.electron;
+    const { ipcRenderer } = window.electron;
+
     const initialMessage = {
         role: "assistant",
         content: "Hi! I'm your MoneyMap assistant. How can I help you today?",
@@ -26,6 +33,7 @@ export default function Chat() {
     const [loading, setLoading] = useState(false);
     const [chatId, setChatId] = useState(null);
     const [savedChats, setSavedChats] = useState({});
+    const [drawerOpened, setDrawerOpened] = useState(false); // State to control the drawer visibility
     const endOfMessagesRef = useRef(null);
 
     useEffect(() => {
@@ -59,12 +67,12 @@ export default function Chat() {
 
         try {
             const res = await fetch("https://moneymap.fadaei.dev/api/chat", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer supersecret123",
-              },
-              body: JSON.stringify({ messages: newMessages }),
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: "Bearer supersecret123",
+                },
+                body: JSON.stringify({ messages: newMessages }),
             });
 
             const data = await res.json();
@@ -93,13 +101,6 @@ export default function Chat() {
         }
     };
 
-    const handleKeyDown = (e) => {
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    };
-
     const startNewChat = () => {
         const newId = Date.now().toString();
         setMessages([initialMessage]);
@@ -121,7 +122,11 @@ export default function Chat() {
         };
         setSavedChats(updatedChats);
         localStorage.setItem("savedChats", JSON.stringify(updatedChats));
-        alert("Chat saved locally!");
+        notifications.show({
+            color: "green",
+            title: "Saved Successfully",
+            message: "Chat saved locally!",
+        });
     };
 
     const deleteChat = (id) => {
@@ -139,174 +144,116 @@ export default function Chat() {
     };
 
     return (
-        <div style={{ display: "flex", height: "100vh", fontFamily: "sans-serif" }}>
-            <div style={{ flex: 3, padding: 20 }}>
-                <div
-                    style={{
-                        border: "1px solid #ccc",
-                        padding: 16,
-                        height: "80vh",
-                        overflowY: "auto",
-                        borderRadius: 8,
-                        marginBottom: 12,
-                    }}
-                >
+        <Container size="xl">
+            <Flex direction="column" h="95vh" ff="var(--mantine-font-family, sans-serif)">
+                {/* Chat Area */}
+                <ScrollArea h="100%" p="md" mb={12} scrollbarSize={6}>
                     {messages.map((msg, index) => (
-                        <div
+                        <Card
                             key={index}
-                            style={{
-                                marginBottom: 12,
-                                textAlign: msg.role === "user" ? "right" : "left",
-                                display: msg.role === "system" ? "none" : "block"
-                            }}
+                            c="var(--mantine-color-gray-3)"
+                            alignSelf={msg.role === 'user' ? 'flex-end' : 'flex-start'}
+                            className={`${classes.messagePaper} ${msg.role === 'user' ? classes.userMessage : classes.assistantMessage
+                                } ${msg.role === 'system' ? classes.hidden : ''}`}
                         >
-                            <div
-                                style={{
-                                    display: "inline-block",
-                                    background: msg.role === "user" ? "#DCF8C6" : "#E9E9EB",
-                                    color: "#333",
-                                    padding: "10px 14px",
-                                    borderRadius: 16,
-                                    maxWidth: "80%",
-                                }}
-                            >
-                                {msg.role === "assistant" ? (
-                                    <ReactMarkdown
-                                        remarkPlugins={[remarkMath]}
-                                        rehypePlugins={[rehypeKatex]}
-                                    >
-                                        {msg.content}
-                                    </ReactMarkdown>
-                                ) : (
-                                    msg.content
-                                )}
-                            </div>
-                        </div>
+                            {msg.role === "assistant" ? (
+                                <ReactMarkdown
+                                    remarkPlugins={[remarkMath]}
+                                    rehypePlugins={[rehypeKatex]}
+                                >
+                                    {msg.content}
+                                </ReactMarkdown>
+                            ) : (
+                                msg.content
+                            )}
+                        </Card>
                     ))}
-                    {loading && (
-                        <div style={{ fontStyle: "italic", color: "#888" }}>Typing...</div>
-                    )}
+                    {loading && <Loader size="lg" color="green.0" type="dots" />}
                     <div ref={endOfMessagesRef} />
-                </div>
+                </ScrollArea>
 
-                <textarea
-                    rows={2}
-                    placeholder="Type your message..."
+                <Textarea
+                    autosize
+                    size="xl"
+                    radius="xl"
+                    classNames={{ section: classes.textareaSection, input: classes.textareaInput }}
+                    minRows={2}
+                    maxRows={7}
+                    placeholder="Ask anything about your finances..."
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    style={{
-                        width: "100%",
-                        padding: 12,
-                        borderRadius: 8,
-                        border: "1px solid #ccc",
-                        resize: "none",
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            sendMessage();
+                        }
                     }}
+                    rightSection={
+                        <IoSend
+                            size={22}
+                            color="var(--mantine-color-blue-5)"
+                            onClick={sendMessage}
+                            style={{ cursor: "pointer" }}
+                            disabled={loading}
+                        />
+                    }
+                    styles={{ input: { overflow: "hidden" } }}
+                    className={classes.textarea}
                 />
-                <button
-                    onClick={sendMessage}
-                    style={{
-                        marginTop: 8,
-                        padding: "10px 16px",
-                        borderRadius: 8,
-                        background: "#0070f3",
-                        color: "#fff",
-                        border: "none",
-                        cursor: "pointer",
-                        width: "100%",
-                    }}
-                    disabled={loading}
+
+                <Group justify="flex-end" spacing="sm" mt={12}>
+                    <Tooltip label="Save Chat" position="top" withArrow>
+                        <Button color="white" variant="subtle" onClick={saveChatManually}>
+                            <FaSave size={20} />
+                        </Button>
+                    </Tooltip>
+
+                    <Tooltip label="Show Saved Chats" position="top" withArrow>
+                        <Button color="white" variant="subtle" onClick={() => setDrawerOpened(true)}>
+                            <FaHistory size={20} />
+                        </Button>
+                    </Tooltip>
+                </Group>
+
+                {/* Saved Chats Drawer */}
+                <Drawer
+                    opened={drawerOpened}
+                    onClose={() => setDrawerOpened(false)}
+                    title="Saved Chats"
+                    padding="lg"
+                    size="sm"
+                    position="right"
+                    overlayProps={{ opacity: 0.5, blur: 4 }}
                 >
-                    Send
-                </button>
-
-                <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                    <button
-                        onClick={startNewChat}
-                        style={{
-                            flex: 1,
-                            padding: "10px 16px",
-                            borderRadius: 8,
-                            background: "#f5f5f5",
-                            border: "1px solid #ccc",
-                            cursor: "pointer",
-                        }}
-                    >
-                        New Chat
-                    </button>
-
-                    <button
-                        onClick={saveChatManually}
-                        style={{
-                            flex: 1,
-                            padding: "10px 16px",
-                            borderRadius: 8,
-                            background: "#34a853",
-                            color: "#fff",
-                            border: "none",
-                            cursor: "pointer",
-                        }}
-                    >
-                        Save Chat
-                    </button>
-                </div>
-            </div>
-
-            <div
-                style={{
-                    flex: 1,
-                    borderLeft: "1px solid #ccc",
-                    padding: 20,
-                    background: "#fafafa",
-                    overflowY: "auto",
-                }}
-            >
-                <h3 style={{ marginTop: 0 }}>Saved Chats</h3>
-                {Object.keys(savedChats).length === 0 && <p>No saved chats.</p>}
-                <ul style={{ listStyle: "none", padding: 0 }}>
-                    {Object.entries(savedChats).map(([id, msgs]) => (
-                        <li
-                            key={id}
-                            style={{
-                                marginBottom: 10,
-                                display: "flex",
-                                alignItems: "center",
-                            }}
-                        >
-                            <button
-                                onClick={() => loadChat(id)}
-                                style={{
-                                    flex: 1,
-                                    textAlign: "left",
-                                    padding: 10,
-                                    borderRadius: 6,
-                                    border: "1px solid #ccc",
-                                    background: id === chatId ? "#e0e0e0" : "#fff",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                {new Date(Number(id)).toLocaleString()}
-                            </button>
-                            <button
-                                onClick={() => deleteChat(id)}
-                                style={{
-                                    marginLeft: 8,
-                                    border: "none",
-                                    background: "#ff4d4d",
-                                    color: "#fff",
-                                    borderRadius: "50%",
-                                    width: 30,
-                                    height: 30,
-                                    cursor: "pointer",
-                                }}
-                                title="Delete Chat"
-                            >
-                                X
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </div>
-        </div>
+                    <Button mb="md" onClick={() => { startNewChat(); setDrawerOpened(false); }} className={classes.newChatButton}>New Chat</Button>
+                    {Object.keys(savedChats).length === 0 ? (
+                        <Text>No saved chats.</Text>
+                    ) : (
+                        <Stack spacing="sm">
+                            {Object.entries(savedChats).map(([id, msgs]) => (
+                                <Group key={id} spacing="xs">
+                                    <Button
+                                        onClick={() => loadChat(id)}
+                                        variant={id === chatId ? 'filled' : 'outline'}
+                                        className={classes.savedChatButton}
+                                    >
+                                        {new Date(Number(id)).toLocaleString()}
+                                    </Button>
+                                    <Button
+                                        onClick={() => deleteChat(id)}
+                                        variant="subtle"
+                                        color="red"
+                                        className={classes.deleteChatButton}
+                                        title="Delete Chat"
+                                    >
+                                        <FaTrash size={16} />
+                                    </Button>
+                                </Group>
+                            ))}
+                        </Stack>
+                    )}
+                </Drawer>
+            </Flex>
+        </Container>
     );
 }

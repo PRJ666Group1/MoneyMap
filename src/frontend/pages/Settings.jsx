@@ -1,62 +1,40 @@
-import React, { useState} from "react";
-import styled from "styled-components";
+import React, { useState } from "react";
 
-
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #1e1e1e;
-  color: white;
-`;
-
-const Button = styled.button`
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  
-
-  &:hover {
-    background-color: #45a049;
-  }
-`;
-
-const Alert = styled.div`
-  text-align: center;
-  margin-top: 30px;
-  color: red;
-  font-size: 18px;
-  font-weight: bold;
-`;
+import { Container, Title, Flex, Button } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 
 const Settings = () => {
-    const { ipcRenderer } = window.electron;
-     const [alertMessage, setAlertMessage] = useState("");
+  const { ipcRenderer } = window.electron;
 
 
   const handleExport = async () => {
     try {
       await ipcRenderer.invoke("export-json");
-      setAlertMessage("Data exported successfully!");
+
+      notifications.show({
+        title: "Export Successful",
+        message: "Data exported successfully!",
+        color: "green",
+      });
+
     } catch (error) {
       console.error("Error exporting data:", error);
-      setAlertMessage("Failed to export data.");
+
+      notifications.show({
+        title: "Export Failed",
+        message: "Failed to export data.",
+        color: "red",
+      });
     }
   };
 
   return (
-    <Container>
-      <h2>Settings</h2>
-      <Button onClick={handleExport}>Export Data to JSON</Button>
-      {alertMessage && <Alert>{alertMessage}</Alert>}
-    </Container>
+    <>
+      <Container pos="relative" style={{ zIndex: 1 }}>
+        <Title c="white" mb="md">Settings</Title>
+        <Button onClick={handleExport}>Export Data to JSON</Button>
+      </Container>
+    </>
   );
 };
 
